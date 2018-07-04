@@ -1,0 +1,59 @@
+<div class="row border-bottom">
+    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+            <form role="search" class="navbar-form-custom" action="search_results.html">
+                <div class="form-group">
+                    <input type="text" placeholder="输入要搜索的内容..." class="form-control" name="top-search" id="top-search">
+                </div>
+            </form>
+        </div>
+        <ul class="nav navbar-top-links navbar-right">
+            <li>
+                <span class="m-r-sm text-muted welcome-message">欢迎访问MQ管理平台</span>
+            </li>
+            <li class="dropdown">
+                <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                    <span class="m-r-sm text-muted welcome-message">帮助</span>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                    <span class="m-r-sm text-muted welcome-message">
+                        <img alt="image" class="img-circle" width="30" height="30" src="/static/img/avatar/admin.png"/>
+                        <span style="font-size: 13px;font-weight: 400"> 用户名{# request.user.name #}
+                            <b class="caret"></b>
+                        </span>
+                    </span>
+                </a>
+                <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                    <li><a href="/users/profile"><i class="fa fa-cogs"> </i><span> 查看资料</span></a>
+                    </li>
+                    <li class="divider"></li>
+                    <li><a href="#"><i class="fa fa-sign-out"></i> 注销</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>{% if app %} {{ app }} {% else %} 应用名称 {% endif %}</h2>
+        <ol class="breadcrumb">
+        <li>
+            <a href="/">仪表盘</a>
+        </li>
+            <li>
+                <a href="#">{% if app %}{{ app }}{% else %}应用名称{% endif %}</a>
+            </li>
+            <li class="active">
+                <strong>{% if action %}{{ action }}{% else %}应用操作{% endif %}</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-sm-2">
+    </div>
+</div>
+
+

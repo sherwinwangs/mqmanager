@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h5>{{ action }}</h5>
+                        <div class="ibox-tools">
+                            <a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                <i class="fa fa-wrench"></i>
+                            </a>
+                            <a class="close-link">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="ibox-content">
+                        <form method="post" id="queueForm" class="form-horizontal" action="">
+                            {% csrf_token %}
+                            {% if error %}
+                                <div class="alert alert-warning text-center">{{ error }}</div>
+                            {% endif %}
+                            {% if msg %}
+                                <div class="alert alert-success">{{ msg | safe }}</div>
+                            {% endif %}
+                            <h3>消息队列信息</h3>
+                            <div class="form-group">
+                                <label for="vhost" class="col-sm-2 control-label">虚拟主机(vhost)<span
+                                        class="red-fonts">*</span></label>
+                                <div class="col-sm-8">
+                                    <select name="vhost" class="form-control">
+                                        {% for vhost in vhost_distinct %}
+                                            {% if vhost == "/" %}
+                                                <option value="{{ vhost }}" selected>{{ vhost }}</option>
+                                            {% else %}
+                                                <option value="{{ vhost }}">{{ vhost }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class=" form-group">
+                                <label for="name" class="col-sm-2 control-label">消息队列名称(Name)<span
+                                        class="red-fonts">*</span></label>
+                                <div class="col-sm-8">
+                                    <input id="name" name="name" placeholder="输入消息队列名称" type="text"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="durable" class="col-sm-2 control-label">消息持久化(Durable)<span
+                                        class="red-fonts">*</span></label>
+                                <div class="col-sm-8">
+                                    <select name="durable" class="form-control">
+                                        <option value="true" selected>持久化(Durable)</option>
+                                        <option value="false">非持久化(Transient)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="auto_delete" class="col-sm-2 control-label">自动删除(Auto delete)<span
+                                        class="red-fonts">*</span></label>
+                                <div class="col-sm-8">
+                                    <select name="auto_delete" class="form-control">
+                                        <option value="false" selected>否(No)</option>
+                                        <option value="true">是(Yes)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-message-ttl"
+                                       class="col-sm-2 control-label">消息生命周期(x-message-ttl)</label>
+                                <div class="col-sm-8">
+                                    <input id="x-message-ttl" name="x-message-ttl" placeholder="消息的生命周期，单位:ms"
+                                           type="text"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-expires" class="col-sm-2 control-label">队列有效期(x-expires)</label>
+                                <div class="col-sm-8">
+                                    <input id="x-expires" name="x-expires" placeholder="队列的有效期，单位:ms" type="text"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-max-length"
+                                       class="col-sm-2 control-label">队列最大长度(x-max-length)</label>
+                                <div class="col-sm-8">
+                                    <input id="x-max-length" name="x-max-length" placeholder="队列最大长度" type="text"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-dead-letter-exchange"
+                                       class="col-sm-2 control-label">死信交换机(x-dead-letter-exchange)</label>
+                                <div class="col-sm-8">
+                                    <input id="x-dead-letter-exchange" name="x-dead-letter-exchange"
+                                           placeholder="死信交换机名称" type="text"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="x-dead-letter-routing-key"
+                                       class="col-sm-2 control-label">死信路由(x-dead-letter-routing-key)</label>
+                                <div class="col-sm-8">
+                                    <input id="x-dead-letter-routing-key" name="x-dead-letter-routing-key"
+                                           placeholder="死信路由键名称" type="text"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <!--
+                                <div class="form-group">
+                                    <label for="arguements"
+                                           class="col-sm-2 control-label">参数(Arguements)</label>
+                                    <div class="col-sm-2">
+                                        <input id="arguements-key" name="arguements-key" type="text"
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-sm-1" style="width: 5px; margin: 5px">=</div>
+                                    <div class="col-sm-2">
+                                        <input id="arguements-value" name="arguements-value" type="text"
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <select name="arguements-type" class="form-control">
+                                            <option value="String" selected>字符串</option>
+                                            <option value="Number">数字</option>
+                                            <option value="Boolean">布尔</option>
+                                            <option value="List">列表</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                -->
+                            <div class="hr-line-dashed"></div>
+                            <h3>交换机绑定</h3>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <label for="exchange" class="col-sm-2 control-label">交换机(Exchange)</label>
+                                <div class="col-sm-8">
+                                    <select name="exchange" class="form-control">
+                                        <option value="" selected>请选择一个绑定的交换机</option>
+                                        {% for exchange in exchange_distinct_list %}
+                                            <option value="{{ exchange.name }}">
+                                                【虚拟主机】{{ exchange.vhost }} 【交换机】{{ exchange.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="routing_key"
+                                       class="col-sm-2 control-label">路由键(routing_key)</label>
+                                <div class="col-sm-8">
+                                    <input id="routing_key" name="routing_key" placeholder="路由键"
+                                           type="text"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            <h3>MQ集群组</h3>
+                            <div class="form-group">
+                                <label for="clusters" class="col-sm-2 control-label">选择MQ集群组<span
+                                        class="red-fonts">*</span></label>
+                                <div class="col-sm-8">
+                                    <select name="cluster" class="form-control select2" multiple>
+                                        {% for cluster,name in mq_clusters_list.items %}
+                                            <option value="{{ cluster }}">{{ cluster }}({{ name }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group">
+                                <div class="col-sm-4 col-sm-offset-2">
+                                    <button class="btn btn-white" type="reset">取消</button>
+                                    <button id="submit_button" class="btn btn-primary" type="submit">提交</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

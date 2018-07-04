@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}}
+{% block content %}
+    <!--页面顶部消息提醒-->
+    <div class="wrapper wrapper-content">
+        {% if error %}
+            <div class="alert alert-warning text-center">{{ error }}</div>
+        {% endif %}
+        {% if msg %}
+            <div class="alert alert-success">{{ msg | safe }}</div>
+        {% endif %}
+
+        <!--汇总统计-->
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-success pull-right">Users</span>
+                        <h5>Users</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins"><a href="#">
+                            {% if users_count %}{{ users_count }}{% else %}2{% endif %}</a></h1>
+                        <small>All user</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-info pull-right">Acls</span>
+                        <h5>vhosts</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins"><a href="#">{% if acl_count %}{{ acls_count }}{% else %}10{% endif %}</a>
+                        </h1>
+                        <small>All Vhosts</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-primary pull-right">View</span>
+                        <h5>Exchange</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins"><a href="#"> <span
+                                id="views"></span>{% if views_count %}{{ views_count }}{% else %}8{% endif %}</a></h1>
+                        <small>All exchange</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-danger pull-right">Domain</span>
+                        <h5>Queue</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins"><a href="#"> <span
+                                id="online_hosts"></span>{% if views_count %}{{ domains_count }}{% else %}2{% endif %}
+                        </a></h1>
+                        <small>All Queue</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--分析图表-->
+        <div class="row" style="padding-left:5px;padding-right:5px;">
+            <div class="ibox float-e-margins">
+                <!--图表头部开始-->
+                <div class="ibox-title">
+                    <h5>消息队列集群状态</h5>
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <!--
+                            <button type="button" class="btn btn-xs btn-white">今天</button>
+                            <button type="button" class="btn btn-xs btn-white active">本周</button>
+                            <button type="button" class="btn btn-xs btn-white">本月</button>
+                            -->
+                        </div>
+                    </div>
+                </div>
+                <!--图表头部结束-->
+                <!--图表内容开始-->
+                <div class="ibox-content">
+                    <div class="row border-bottom white-bg dashboard-header">
+                        <div id="queue-length" class="col-md-6" style="height: 346px;padding: 0px 0 0px 0;"></div>
+                        <div id="queue-rate" class="col-md-6" style="height: 346px;padding: 0px 0 0px 0;"></div>
+                    </div>
+                </div>
+                <!--图表内容结束-->
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block custom_foot_js %}
+        <script src="{% static "js/plugins/echarts/echarts.js" %}"></script>
+    <script src="{% static "js/plugins/codemirror/codemirror.js" %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#show').click(function () {
+                $('#show').css('display', 'none');
+                $('#more').css('display', 'block');
+            })
+        });
+        require.config({
+            paths: {
+                'echarts': '/static/js/plugins/echarts/chart/',
+                'echarts/chart/line': '/static/js/plugins/echarts/chart/line'
+            }
+        });
+        require(
+            [
+                'echarts',
+                'echarts/chart/line'
+            ],
+            function (ec) {
+                var QueueLength = ec.init(document.getElementById('queue-length'));
+                var option = {
+                    title: {
+                        text: '消息队列状态',
+                        subtext: '当前消息队列的状态',
+                        x: 'center',
+                        //y: 'center',
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    backgroundColor: '#fff',
+                    legend: {
+                        data: ['Total', 'Ready'],
+                        x: 'center',
+                        y: 'bottom',
+                        //orient: 'vertical',
+                    },
+                    toolbox: {
+                        show: false,
+                        feature: {
+                            magicType: {show: true, type: ['line', 'bar']}
+                        }
+                    },
+                    calculable: true,
+                    xAxis: [
+                        {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: ['15:55:00', '15:55:10', '15:55:20', '15:55:30', '15:55:40', '15:55:50', '15:56:00']
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            name: 'Total',
+                            type: 'line',
+                            smooth: true,
+                            //itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                            data: [320, 332, 301, 334, 390, 330, 320]
+                        },
+                        {
+                            name: 'Ready',
+                            type: 'line',
+                            smooth: true,
+                            //itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                            data: [310, 332, 101, 534, 490, 30, 520]
+                        }
+                    ]
+                };
+                QueueLength.setOption(option);
+                /*窗口自适应，关键代码*/
+                setTimeout(function () {
+                    window.onresize = function () {
+                        QueueLength.resize();
+                    }
+                })
+            }
+        );        require(
+            [
+                'echarts',
+                'echarts/chart/line'
+            ],
+            function (ec) {
+                var QueueRate = ec.init(document.getElementById('queue-rate'));
+                var option = {
+                    title: {
+                        text: '消息队列速度',
+                        subtext: '当前消息队列的速度',
+                        x: 'center',
+                        //y: 'center',
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    backgroundColor: '#fff',
+                    legend: {
+                        data: ['Publish', 'Confirm','Redelivered','Get'],
+                        x: 'center',
+                        y: 'bottom',
+                        //orient: 'vertical',
+                    },
+                    toolbox: {
+                        show: false,
+                        feature: {
+                            magicType: {show: true, type: ['line', 'bar']}
+                        }
+                    },
+                    calculable: true,
+                    xAxis: [
+                        {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: ['15:55:00', '15:55:10', '15:55:20', '15:55:30', '15:55:40', '15:55:50', '15:56:00']
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            name: 'Publish',
+                            type: 'line',
+                            smooth: true,
+                            //itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                            data: [20, 25, 51, 22, 37, 25, 11]
+                        },
+                        {
+                            name: 'Confirm',
+                            type: 'line',
+                            smooth: true,
+                            //itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                            data: [50, 11, 35, 73, 28, 39, 17]
+                        },
+                        {
+                            name: 'Redelivered',
+                            type: 'line',
+                            smooth: true,
+                            //itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                            data: [0, 0, 0, 10, 0, 0, 0]
+                        },
+                        {
+                            name: 'Get',
+                            type: 'line',
+                            smooth: true,
+                            //itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                            data: [1, 0, 5, 10, 6, 0, 0]
+                        },
+
+                    ]
+                };
+                QueueRate.setOption(option);
+                /*窗口自适应，关键代码*/
+                setTimeout(function () {
+                    window.onresize = function () {
+                        QueueRate.resize();
+                    }
+                })
+            }
+        );
+
+    </script>
+{% endblock %}

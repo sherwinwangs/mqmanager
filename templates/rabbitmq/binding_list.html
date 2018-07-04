@@ -1,0 +1,33 @@
+{% extends '_base_list.html' %}
+{% load common_tags %}
+
+{% block table_head %}
+    <td>环境</td>
+    <td>虚拟主机</td>
+    <td>交换机</td>
+    <td>目标</td>
+    <td>目标类型</td>
+    <td>路由键</td>
+    <td>参数</td>
+    <td>操作</td>
+{% endblock %}
+
+{% block table_body %}
+    <a class="btn btn-success" href="{% url 'binding-add' %}?cluster={{ res.cluster|url_encode }}&vhost={{ res.vhost|url_encode }}&exchange={{ res.exchange|url_encode }}">添加绑定</a>
+    {% for cluster,info in binding_list.items %}
+        {% for i in info %}
+            <tr>
+                <td>{{ cluster }}</td>
+                <td>{{ i.vhost }}</td>
+                <td>{{ i.source }}</td>
+                <td>{{ i.destination }}</td>
+                <td>{{ i.destination_type }}</td>
+                <td>{{ i.routing_key }}</td>
+                <td>{{ i.arguments }}</td>
+                <td>
+                    <a href="{% url 'binding-delete' %}?cluster={{ cluster }}&vhost={{ i.vhost |url_encode }}&exchange={{ i.source }}&destination={{ i.destination }}&type={% if i.destination_type == 'queue' %}q{% elif i.destination_type == 'exchange' %}e{% endif %}&properties_key={% if i.routing_key %}{{ i.routing_key }}{% else %}~{% endif %}" class="btn btn-xs btn-danger">删除</a>
+                </td>
+            </tr>
+        {% endfor %}
+    {% endfor %}
+{% endblock %}
