@@ -58,8 +58,23 @@ class RabbitMQAPI(object):
         return message
 
     def delete_vhost(self, vhost):
-        res = self.call_api(method='DELETE', path='/vhosts/%s' % urllib.quote_plus(vhost))
+        res = self.call_api(method='DELETE', path='vhosts/%s' % urllib.quote_plus(vhost))
         return res
+
+    def list_permission(self, vhost):
+        res = self.call_api(path='vhosts/%s/permissions' % urllib.quote_plus(vhost))
+        return res
+
+    def create_permission(self, vhost, user):
+        try:
+            self.call_api(method='PUT', path='permissions/%s/%s' % (vhost, user))
+            message = {'tags': 'success', 'detail': '添加权限成功'}
+        except Exception, e:
+            message = {'tags': 'success', 'detail': '添加权限失败'}
+        return message
+
+    def list_users(self):
+        return self.call_api(path='users')
 
     def list_queues(self, vhost=''):
         res = self.call_api(path='queues/' + urllib.quote_plus(vhost))
@@ -201,7 +216,32 @@ class batch_exec(RabbitMQAPI):
             mq_obj.delete_vhost(vhost)
         return True
 
-    def list_queues(self,vhost=''):
+    def list_permission(self, vhost):
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+        return mq_obj.list_permission(vhost)
+
+    def create_permission(self, vhost, user, data={}):
+        messages = []
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            res = mq_obj.create_permission(vhost, user)
+            res['detail'] = '[集群:%s][详情:%s][操作对象:添加用户:%s操作虚拟主机:%s的权限:配置:%s,读:%s,写:%s]' % (
+                k, res['detail'], user, vhost, data['config'], data['read'], data['write'])
+            messages.append(res)
+        return messages
+
+    def list_users(self):
+        user_info = []
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            user_info.append({k: mq_obj.list_users()})
+        return user_info
+
+    def list_queues(self, vhost=''):
         queue_info = []
         for k, v in self.cluster_connector_args.items():
             mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
@@ -264,7 +304,8 @@ class batch_exec(RabbitMQAPI):
             mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
                                  user_name=v['user_name'], password=v['password'])
             res = mq_obj.create_binding(vhost, exchange, type, destination, data=data)
-            res['detail'] = '[集群:%s][详情:%s][虚拟主机:%s][源交换机:%s][目标:%s][目标类型:%s]' % (k, res['detail'], vhost,exchange,destination,type)
+            res['detail'] = '[集群:%s][详情:%s][虚拟主机:%s][源交换机:%s][目标:%s][目标类型:%s]' % (
+                k, res['detail'], vhost, exchange, destination, type)
             messages.append(res)
         return messages
 
@@ -303,7 +344,7 @@ http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/qqq1/rtk11
 # c= b.create_vhost(['shahem7','shahe'], 'ss')
 # print(c)
 
-#a = batch_exec()
-#print(a.list_queues('csdnpay'))
+# a = batch_exec()
+# print(a.list_queues('csdnpay'))
 # a.list_all_vhost()
 # print(a.cluster_connector_args)

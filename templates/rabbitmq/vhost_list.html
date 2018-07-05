@@ -24,11 +24,9 @@
             <td class="text-center">{{ j.messages_ready }}</td>
             <td class="text-center">{{ j.messages_unacknowledged }}</td>
             <td class="text-center">
-                <a href="#" class="btn btn-xs btn-info {% if j.name == '/' %} disabled{% endif %}">编辑</a>
+                <a href="{% url 'permission-list' %}?cluster={{ k }}&vhost={{ j.name }}" class="btn btn-xs btn-info">编辑</a>
                 <a class="btn btn-xs btn-danger btn_vhost_delete {% if j.name == '/' %} disabled{% endif %}"
                    data-cluster="{{ k }}" data-vhost="{{ j.name | url_encode }}">删除</a>
-                <!-- <a href="/mq/vhost/delete?cluster={{ k }}&vhost={{ j.name | url_encode }}"
-                   class="btn btn-xs btn-danger btn_vhost_delete {% if j.name == '/' %} disabled{% endif %}">删除</a> -->
             </td>
             </tr>
             {% endfor %}

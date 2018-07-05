@@ -43,6 +43,32 @@ def vhost_delete(request):
     return HttpResponseRedirect('/vhost/list')
 
 
+def permission_list(request):
+    app, action = "虚拟主机", "虚拟主机权限列表"
+    r_data = request.GET
+    print(r_data)
+    obj = batch_exec(request.GET['cluster'])
+    permission_list = obj.list_permission(r_data['vhost'])
+    return render(request, 'rabbitmq/permission_list.html', locals())
+
+
+def permission_create(request):
+    app, action = "虚拟主机", "虚拟主机权限添加"
+    f_data = request.GET
+    obj = batch_exec(request.GET['cluster'])
+    user_list = obj.list_users()
+    #data = {"vhost": r_data['vhost'], "username": r_data['user'], "configure": r_data['configure'],
+    #        "write": r_data['write'], "read": r_data['read']}
+    #obj.create_permission(vhost=r_data['vhost'], user=r_data['user'], data=data)
+    return render(request, 'rabbitmq/permission_create.html', locals())
+
+
+# {"vhost":"qianbaoxiaodai","username":"base_csdnpay","configure":".*","write":".*","read":".*"}
+
+def user_list(request):
+    app, action = "用户", "用户列表"
+    return True
+
 def exchange_list(request):
     app, action = "交换机", "交换机列表"
     exchange_obj = batch_exec()
@@ -107,10 +133,12 @@ def binding_create(request):
 def binding_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
-    data = {"vhost":r_data['vhost'],"source":r_data['exchange'],"destination":r_data['destination'],"destination_type":r_data['type'],"properties_key":r_data['properties_key']}
+    data = {"vhost": r_data['vhost'], "source": r_data['exchange'], "destination": r_data['destination'],
+            "destination_type": r_data['type'], "properties_key": r_data['properties_key']}
     obj.delete_binding(r_data['vhost'], r_data['exchange'], r_data['type'], r_data['destination'],
                        r_data['properties_key'], data=data)
-    return HttpResponseRedirect('/exchanges/bindings/list?cluster=%s&vhost=%s&exchange=%s' %(r_data['cluster'],r_data['vhost'],r_data['exchange']))
+    return HttpResponseRedirect('/exchanges/bindings/list?cluster=%s&vhost=%s&exchange=%s' % (
+    r_data['cluster'], r_data['vhost'], r_data['exchange']))
 
 
 def exchange_delete(request):
@@ -167,4 +195,4 @@ def queue_delete(request):
 
 
 def test_url(request, *args, **kwargs):
-    return render(request,'/test/test.html',locals())
+    return render(request, '/test/test.html', locals())

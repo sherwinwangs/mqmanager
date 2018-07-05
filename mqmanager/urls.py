@@ -33,6 +33,10 @@ urlpatterns = [
     url(r'^vhost/add$', vhost_create, name='vhost-add'),
     url(r'^vhost/delete$', vhost_delete, name='vhost-delete'),
 
+    # permission
+    url(r'^permission/list$', permission_list, name='permission-list'),
+    url(r'^permission/add$', permission_create, name='permission-add'),
+
     # queue
     url(r'^queue/list$', queue_list, name='queue-list'),
     url(r'^queue/add$', queue_create, name='queue-add'),
