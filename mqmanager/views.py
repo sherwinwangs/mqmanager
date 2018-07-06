@@ -57,9 +57,11 @@ def permission_create(request):
     f_data = request.GET
     obj = batch_exec(request.GET['cluster'])
     user_list = obj.list_users()
-    #data = {"vhost": r_data['vhost'], "username": r_data['user'], "configure": r_data['configure'],
-    #        "write": r_data['write'], "read": r_data['read']}
-    #obj.create_permission(vhost=r_data['vhost'], user=r_data['user'], data=data)
+    if request.method == 'POST':
+        r_data = request.POST
+        data = {"vhost": r_data['vhost'], "username": r_data['user'], "configure": r_data['configure'],
+                "write": r_data['write'], "read": r_data['read']}
+        messages = obj.create_permission(vhost=r_data['vhost'], user=r_data['user'], data=data)
     return render(request, 'rabbitmq/permission_create.html', locals())
 
 
@@ -68,6 +70,7 @@ def permission_create(request):
 def user_list(request):
     app, action = "用户", "用户列表"
     return True
+
 
 def exchange_list(request):
     app, action = "交换机", "交换机列表"
@@ -138,7 +141,7 @@ def binding_delete(request):
     obj.delete_binding(r_data['vhost'], r_data['exchange'], r_data['type'], r_data['destination'],
                        r_data['properties_key'], data=data)
     return HttpResponseRedirect('/exchanges/bindings/list?cluster=%s&vhost=%s&exchange=%s' % (
-    r_data['cluster'], r_data['vhost'], r_data['exchange']))
+        r_data['cluster'], r_data['vhost'], r_data['exchange']))
 
 
 def exchange_delete(request):

@@ -65,12 +65,12 @@ class RabbitMQAPI(object):
         res = self.call_api(path='vhosts/%s/permissions' % urllib.quote_plus(vhost))
         return res
 
-    def create_permission(self, vhost, user):
+    def create_permission(self, vhost, user, data={}):
         try:
-            self.call_api(method='PUT', path='permissions/%s/%s' % (vhost, user))
+            self.call_api(method='PUT', path='permissions/%s/%s' % (vhost, user),data=json.dumps(data))
             message = {'tags': 'success', 'detail': '添加权限成功'}
         except Exception, e:
-            message = {'tags': 'success', 'detail': '添加权限失败'}
+            message = {'tags': 'danger', 'detail': '添加权限失败%s' % e}
         return message
 
     def list_users(self):
@@ -227,9 +227,9 @@ class batch_exec(RabbitMQAPI):
         for k, v in self.cluster_connector_args.items():
             mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
                                  user_name=v['user_name'], password=v['password'])
-            res = mq_obj.create_permission(vhost, user)
+            res = mq_obj.create_permission(vhost, user,data)
             res['detail'] = '[集群:%s][详情:%s][操作对象:添加用户:%s操作虚拟主机:%s的权限:配置:%s,读:%s,写:%s]' % (
-                k, res['detail'], user, vhost, data['config'], data['read'], data['write'])
+                k, res['detail'], user, vhost, data['configure'], data['read'], data['write'])
             messages.append(res)
         return messages
 
