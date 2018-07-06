@@ -36,6 +36,7 @@ urlpatterns = [
     # permission
     url(r'^permission/list$', permission_list, name='permission-list'),
     url(r'^permission/add$', permission_create, name='permission-add'),
+    url(r'^permission/delete$', permission_delete, name='permission-delete'),
 
     # queue
     url(r'^queue/list$', queue_list, name='queue-list'),

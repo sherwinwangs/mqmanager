@@ -65,7 +65,13 @@ def permission_create(request):
     return render(request, 'rabbitmq/permission_create.html', locals())
 
 
-# {"vhost":"qianbaoxiaodai","username":"base_csdnpay","configure":".*","write":".*","read":".*"}
+def permission_delete(request):
+    r_data = request.GET
+    obj = batch_exec(r_data['cluster'])
+    data = {"username": r_data['username'], "vhost": r_data['vhost']}
+    obj.delete_permission(r_data['vhost'], username=r_data['username'], data=data)
+    return HttpResponseRedirect('/permission/list?cluster=%s&vhost=%s' % (r_data['cluster'], r_data['vhost']))
+
 
 def user_list(request):
     app, action = "用户", "用户列表"

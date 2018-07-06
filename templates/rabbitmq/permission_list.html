@@ -21,7 +21,7 @@
                 <td align="center">{{ i.write }}</td>
                 <td align="center">{{ i.read }}</td>
                 <td align="center">
-                    <a href="#" class="btn btn-xs btn-danger">删除</a>
+                    <a href="{% url 'permission-delete' %}?cluster={{ r_data.cluster }}&vhost={{ i.vhost }}&username={{ i.user }}" class="btn btn-xs btn-danger">删除</a>
                 </td>
             </tr>
     {% endfor %}

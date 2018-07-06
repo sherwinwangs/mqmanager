@@ -67,11 +67,15 @@ class RabbitMQAPI(object):
 
     def create_permission(self, vhost, user, data={}):
         try:
-            self.call_api(method='PUT', path='permissions/%s/%s' % (vhost, user),data=json.dumps(data))
+            self.call_api(method='PUT', path='permissions/%s/%s' % (vhost, user), data=json.dumps(data))
             message = {'tags': 'success', 'detail': '添加权限成功'}
         except Exception, e:
             message = {'tags': 'danger', 'detail': '添加权限失败%s' % e}
         return message
+
+    def delete_permission(self, vhost, username, data={}):
+        res = self.call_api(method='DELETE', path='permissions/%s/%s' % (vhost, username), data=json.dumps(data))
+        return res
 
     def list_users(self):
         return self.call_api(path='users')
@@ -227,11 +231,18 @@ class batch_exec(RabbitMQAPI):
         for k, v in self.cluster_connector_args.items():
             mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
                                  user_name=v['user_name'], password=v['password'])
-            res = mq_obj.create_permission(vhost, user,data)
+            res = mq_obj.create_permission(vhost, user, data)
             res['detail'] = '[集群:%s][详情:%s][操作对象:添加用户:%s操作虚拟主机:%s的权限:配置:%s,读:%s,写:%s]' % (
                 k, res['detail'], user, vhost, data['configure'], data['read'], data['write'])
             messages.append(res)
         return messages
+
+    def delete_permission(self, vhost, username, data={}):
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            mq_obj.delete_permission(vhost,username, data)
+        return True
 
     def list_users(self):
         user_info = []
