@@ -1,5 +1,11 @@
 {% extends '_base_list.html' %}
 
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 该管理平台所管理的所有MQ集群列表，如果要增加新的集群，请在项目目录中的settings文件中添加。</p>
+    </div>
+{% endblock %}
+
 {% block table_head %}
     <td class="text-center">环境</td>
     <td class="text-center">集群名称</td>
@@ -16,7 +22,7 @@
             <td class="text-center">{{ info.username }}</td>
             <td class="text-center">
                 <a href="#" class="btn btn-xs btn-info">健康状态</a>
-                <a href="#" class="btn btn-xs btn-danger">同步配置</a>
+                <a href="{% url 'definitions-sync' %}?destination={{ mq }}" class="btn btn-xs btn-danger">同步配置</a>
             </td>
         </tr>
     {% endfor %}

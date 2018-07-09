@@ -1,6 +1,10 @@
 {% extends '_base_list.html' %}
 {% load common_tags %}
-
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 是指MQ管理平台所管理的所有MQ集群中的交换机(exchange)列表。</p>
+    </div>
+{% endblock %}
 {% block table_head %}
     <td align="center">环境</td>
     <td align="center">虚拟主机</td>

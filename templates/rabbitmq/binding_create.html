@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
-
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 为当前交换机添加绑定消息队列。需要选择一个要绑定的消息队列名称，并填写正确的路由键(routing key)</p>
+    </div>
+{% endblock %}
 {% block content %}
     <div class="wrapper wrapper-content animated fadeInRight">
         <div class="row">

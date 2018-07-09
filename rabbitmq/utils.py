@@ -4,7 +4,7 @@ import logging
 import urllib
 import urllib2
 import json
-from settings import rabbitmq_list
+from mqmanager.settings import rabbitmq_list
 
 
 class RabbitMQAPI(object):
@@ -19,7 +19,7 @@ class RabbitMQAPI(object):
         self.queue_name = queue_name
         self.host_name = host_name
 
-    def call_api(self, method='GET', path='', data=''):
+    def call_api(self, method='GET', path='', data='',headers=[]):
         '''Call the REST API and convert the results into JSON.'''
         url = '{0}://{1}:{2}/api/{3}'.format(self.protocol, self.host_name, self.port, path)
         password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -27,7 +27,7 @@ class RabbitMQAPI(object):
         handler = urllib2.HTTPBasicAuthHandler(password_mgr)
         # logging.debug('Issue a rabbit API call to get data on ' + path + " against " + self.host_name)
         # logging.debug('Full URL:' + url)
-        print(url, method, data)
+        print(url, method, headers, data)
         if method == 'PUT':
             request = urllib2.Request(url, data=data)
             request.add_header('content-type', 'application/json')
@@ -142,6 +142,18 @@ class RabbitMQAPI(object):
             return True
         except urllib2.URLError, e:
             return e.reason
+
+    def definitions_export(self):
+        try:
+            res = self.call_api(path='definitions')
+            return res
+        except Exception, e:
+            return False
+
+    def definitions_import(self, data):
+        self.call_api(method='POST', path='definitions', data=json.dumps(data), headers=[{"content-type":"multipart/form-data"}])
+        message = {'tags': 'success', 'detail': '导入集群配置成功'}
+        return message
 
 
 '''
@@ -333,6 +345,20 @@ class batch_exec(RabbitMQAPI):
                                  user_name=v['user_name'], password=v['password'])
             mq_obj.delete_binding(vhost, exchange, type, destination, properties_key, data=data)
         return True
+
+    def definitions_export(self):
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            res = mq_obj.definitions_export()
+        return res
+
+    def definitions_import(self, data):
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            res = mq_obj.definitions_import(data=data)
+        return res
 
 
 '''

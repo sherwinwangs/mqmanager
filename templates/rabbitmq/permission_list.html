@@ -1,6 +1,14 @@
 {% extends '_base_list.html' %}
 {% load common_tags %}
 
+
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 用来查看该虚拟主机(vhost)及该虚拟主机下的交换机(exchange)、及消息队列(queue)的操作权限。</p>
+        <p>注意：为保证该平台能够对MQ集群进行操作，请保留平台连接MQ时使用的账号对应的权限。</p>
+    </div>
+{% endblock %}
+
 {% block table_head %}
     <td align="center">环境</td>
     <td align="center">虚拟主机</td>

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
-
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 用来为当前虚拟主机添加相应的访问权限，需要选择一个该MQ集群中的用户，并配置相关的可配置、可读取、可写入权限，完成权限的创建。</p>
+    </div>
+{% endblock %}
 {% block content %}
     <div class="wrapper wrapper-content animated fadeInRight">
         <div class="row">

@@ -1,11 +1,17 @@
 {% extends '_base_list.html' %}
 {% load common_tags %}
-
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 是指MQ管理平台所管理的所有MQ集群中的消息队列(queue)列表。</p>
+        <p>注意：消息队列所对应的集群消费者名称为手动采集，如有缺失信息，请在数据库中补充</p>
+    </div>
+{% endblock %}
 {% block table_head %}
     <td class="text-center">环境</td>
     <td class="text-center">虚拟主机</td>
     <td class="text-center">队列名称</td>
-    <td class="text-center">状态</td>
+    <!--<td class="text-center">状态</td>-->
+    <td class="text-center">消费集群</td>
     <td class="text-center">消费者</td>
     <td class="text-center">消息总数</td>
     <td class="text-center">消息Ready</td>
@@ -13,6 +19,7 @@
     <td class="text-center">消息-入</td>
     <td class="text-center">消息-出</td>
     <td class="text-center">消息-ACK</td>
+    <td class="text-center">备注信息</td>
     <td class="text-center">操作</td>
 {% endblock %}
 
@@ -24,7 +31,8 @@
                     <td class="text-center">{{ k |env_name }}</td>
                     <td class="text-center">{{ j.vhost }}</td>
                     <td class="text-center">{{ j.name }}</td>
-                    <td class="text-center">{{ j.state }}</td>
+                    <!-- <td class="text-center">{{ j.state }}</td> -->
+                    <td class="text-center">{{ j.name |queue_consumers }}</td>
                     <td class="text-center">{{ j.consumers }}</td>
                     <td class="text-center">{{ j.messages }}</td>
                     <td class="text-center">{{ j.messages_ready }}</td>
@@ -32,6 +40,7 @@
                     <td class="text-center">{{ j.backing_queue_status.avg_ingress_rate }}</td>
                     <td class="text-center">{{ j.backing_queue_status.avg_egress_rate }}</td>
                     <td class="text-center">{{ j.backing_queue_status.avg_ack_ingress_rate }}</td>
+                    <td class="text-center">{{ j.name| queue_consumers_comment }}</td>
                     <td>
                         <a class="btn btn-xs btn-danger btn_queue_delete"
                            data-cluster="{{ k }}" data-vhost="{{ j.vhost }}"

@@ -1,6 +1,10 @@
 {% extends '_base_list.html' %}
 {% load common_tags %}
-
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 是指MQ管理平台所管理的所有MQ集群中的虚拟主机列表。</p>
+    </div>
+{% endblock %}
 {% block table_head %}
     <td class="text-center">环境</td>
     <td class="text-center">vhost</td>
@@ -24,7 +28,8 @@
             <td class="text-center">{{ j.messages_ready }}</td>
             <td class="text-center">{{ j.messages_unacknowledged }}</td>
             <td class="text-center">
-                <a href="{% url 'permission-list' %}?cluster={{ k }}&vhost={{ j.name }}" class="btn btn-xs btn-info">编辑</a>
+                <a href="{% url 'permission-list' %}?cluster={{ k }}&vhost={{ j.name }}"
+                   class="btn btn-xs btn-info">编辑</a>
                 <a class="btn btn-xs btn-danger btn_vhost_delete {% if j.name == '/' %} disabled{% endif %}"
                    data-cluster="{{ k }}" data-vhost="{{ j.name | url_encode }}">删除</a>
             </td>
@@ -55,10 +60,14 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
-                    {text: '创建虚拟主机', action: function (e, dt, button, config) { window.location = '{% url 'vhost-add' %}'; } },
-                    {extend: 'copy',text: '复制到剪贴板'},
-                    {extend: 'csv',text:'导出CSV',title: '虚拟主机搜索结果'},
-                    {extend: 'excel', text:'导出EXCEL',title: '虚拟主机搜索结果'},
+                    {
+                        text: '创建虚拟主机', action: function (e, dt, button, config) {
+                            window.location = '{% url 'vhost-add' %}';
+                        }
+                    },
+                    {extend: 'copy', text: '复制到剪贴板'},
+                    {extend: 'csv', text: '导出CSV', title: '虚拟主机搜索结果'},
+                    {extend: 'excel', text: '导出EXCEL', title: '虚拟主机搜索结果'},
                 ], "oLanguage": { // 国际化配置
                     "sProcessing": "正在获取数据，请稍后...",
                     "sLengthMenu": "显示 _MENU_ 条",

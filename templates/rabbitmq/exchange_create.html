@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
-
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 用来创建新的exchange，必须选择一个vhost，并填写exchange的名称，尽量使用一个有意义的名字作为vhost的名称，在【MQ集群组】中选择一个或多个MQ集群可以批量的在所选择的MQ集群上执行相关的操作。</p>
+        <p>注意：如果所选择的虚拟主机(vhost)在某个MQ集群中不存在会导致创建exchange失败，请在提交请求后查看相关的提示。</p>
+    </div>
+{% endblock %}
 {% block content %}
     <div class="wrapper wrapper-content animated fadeInRight">
         <div class="row">
