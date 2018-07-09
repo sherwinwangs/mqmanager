@@ -74,7 +74,8 @@ class RabbitMQAPI(object):
         return message
 
     def delete_permission(self, vhost, username, data={}):
-        res = self.call_api(method='DELETE', path='permissions/%s/%s' % (vhost, username), data=json.dumps(data))
+        res = self.call_api(method='DELETE', path='permissions/%s/%s' % (urllib.quote_plus(vhost), username),
+                            data=json.dumps(data))
         return res
 
     def list_users(self):
@@ -210,7 +211,13 @@ class batch_exec(RabbitMQAPI):
                                  user_name=v['user_name'], password=v['password'])
             res = mq_obj.create_vhost(vhost)
             res['detail'] = '[集群:%s][详情:%s][操作对象:%s]' % (k, res['detail'], res['obj'])
+            admin_user = rabbitmq_list[k]['username']
+            res2 = mq_obj.create_permission(vhost=vhost, user=admin_user,
+                                            data={"vhost": vhost, "username": admin_user, "configure": ".*",
+                                                  "write": ".*", "read": ".*"})
+            res2['detail'] = '[集群:%s][详情:%s][虚拟主机:%s][管理员账号:%s]' % (k, res2['detail'], vhost, admin_user)
             messages.append(res)
+            messages.append(res2)
         return messages
 
     def delete_vhost(self, vhost):
@@ -241,7 +248,7 @@ class batch_exec(RabbitMQAPI):
         for k, v in self.cluster_connector_args.items():
             mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
                                  user_name=v['user_name'], password=v['password'])
-            mq_obj.delete_permission(vhost,username, data)
+            mq_obj.delete_permission(vhost, username, data)
         return True
 
     def list_users(self):

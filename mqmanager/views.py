@@ -40,7 +40,8 @@ def vhost_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
     obj.delete_vhost(r_data['vhost'])
-    return HttpResponseRedirect('/vhost/list')
+    #return HttpResponseRedirect('/vhost/list')
+    return HttpResponse(200)
 
 
 def permission_list(request):
@@ -70,7 +71,8 @@ def permission_delete(request):
     obj = batch_exec(r_data['cluster'])
     data = {"username": r_data['username'], "vhost": r_data['vhost']}
     obj.delete_permission(r_data['vhost'], username=r_data['username'], data=data)
-    return HttpResponseRedirect('/permission/list?cluster=%s&vhost=%s' % (r_data['cluster'], r_data['vhost']))
+    #return HttpResponseRedirect('/permission/list?cluster=%s&vhost=%s' % (r_data['cluster'], r_data['vhost']))
+    return HttpResponse(200)
 
 
 def user_list(request):
@@ -154,7 +156,9 @@ def exchange_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
     obj.delete_exchange(r_data['vhost'], r_data['exchange'])
-    return HttpResponseRedirect('/exchange/list')
+    #return HttpResponseRedirect('/exchange/list')
+    return HttpResponse(200)
+
 
 
 def queue_list(request):
@@ -200,7 +204,8 @@ def queue_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
     obj.delete_queue(r_data['vhost'], r_data['queue'])
-    return HttpResponseRedirect('/queue/list')
+    #return HttpResponseRedirect('/queue/list')
+    return HttpResponse(200)
 
 
 def test_url(request, *args, **kwargs):

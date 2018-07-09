@@ -118,19 +118,21 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
-#TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
+# TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 
 rabbitmq_list = {
     "juhe-shahe-pro": {
         "name": "聚合沙河-生产",
         "api_url": "http://192.168.2.11:15672",
         "username": "guest",
-        "password": "guest"
+        "password": "guest",
+        "node_list": ['192.168.2.11'],
     },
     "juhe-m7-pro": {
         "name": "聚合M7-生产",
         "api_url": "http://192.168.2.12:15672",
         "username": "guest",
-        "password": "guest"
+        "password": "guest",
+        "node_list": ['192.168.2.12'],
     }
 }

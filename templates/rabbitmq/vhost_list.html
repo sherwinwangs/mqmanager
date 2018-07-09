@@ -41,9 +41,7 @@
             var vhost = $this.data('vhost');
             var url = '{% url 'vhost-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost);
             var content = cluster + '集群的虚拟主机:' + vhost
-            var redirectUrl = 'http://127.0.0.1:8000/mq/vhost/list'
-            console.log(url)
-            objectDeleteGet($this, url, content, redirectUrl);
+            objectDeleteGet($this, url, content);
         });
     </script>
 

@@ -13,20 +13,31 @@
 
 {% block table_body %}
     {% for i in permission_list %}
-            <tr>
-                <td align="center">{{ r_data.cluster |env_name}}</td>
-                <td align="center">{{ i.vhost }}</td>
-                <td align="center">{{ i.user }}</td>
-                <td align="center">{{ i.configure }}</td>
-                <td align="center">{{ i.write }}</td>
-                <td align="center">{{ i.read }}</td>
-                <td align="center">
-                    <a href="{% url 'permission-delete' %}?cluster={{ r_data.cluster }}&vhost={{ i.vhost }}&username={{ i.user }}" class="btn btn-xs btn-danger">删除</a>
-                </td>
-            </tr>
+        <tr>
+            <td align="center">{{ r_data.cluster |env_name }}</td>
+            <td align="center">{{ i.vhost }}</td>
+            <td align="center">{{ i.user }}</td>
+            <td align="center">{{ i.configure }}</td>
+            <td align="center">{{ i.write }}</td>
+            <td align="center">{{ i.read }}</td>
+            <td align="center">
+                <a class="btn btn-xs btn-danger btn_permission_delete" data-cluster="{{ r_data.cluster }}" data-vhost="{{ i.vhost }}" data-username="{{ i.user }}">删除</a>
+            </td>
+        </tr>
     {% endfor %}
 {% endblock %}
 {% block custom_foot_js %}
+    <script>
+        $(document).ready().on('click', '.btn_permission_delete', function () {
+            var $this = $(this);
+            var cluster = $this.data('cluster');
+            var vhost = $this.data('vhost');
+            var username = $this.data('username');
+            var url = '{% url 'permission-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&username=username0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("username0000000000", username);
+            var content = cluster + '集群的用户' + username + '访问虚拟主机' + vhost + '的权限'
+            objectDeleteGet($this, url, content);
+        });
+    </script>
     <script>
         $(document).ready(function () {
             $('.dataTables-example').DataTable({
@@ -37,10 +48,14 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
-                    {text: '添加权限', action: function (e, dt, button, config) { window.location = '{% url 'permission-add' %}?cluster={{ r_data.cluster }}&vhost={{ r_data.vhost }}'; } },
-                    {extend: 'copy',text: '复制到剪贴板'},
-                    {extend: 'csv',text:'导出CSV',title: '权限搜索结果'},
-                    {extend: 'excel', text:'导出EXCEL',title: '权限搜索结果'},
+                    {
+                        text: '添加权限', action: function (e, dt, button, config) {
+                            window.location = '{% url 'permission-add' %}?cluster={{ r_data.cluster }}&vhost={{ r_data.vhost }}';
+                        }
+                    },
+                    {extend: 'copy', text: '复制到剪贴板'},
+                    {extend: 'csv', text: '导出CSV', title: '权限搜索结果'},
+                    {extend: 'excel', text: '导出EXCEL', title: '权限搜索结果'},
                 ], "oLanguage": { // 国际化配置
                     "sProcessing": "正在获取数据，请稍后...",
                     "sLengthMenu": "显示 _MENU_ 条",
