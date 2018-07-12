@@ -46,7 +46,6 @@ def vhost_delete(request):
 def permission_list(request):
     app, action = "虚拟主机", "虚拟主机权限列表"
     r_data = request.GET
-    print(r_data)
     obj = batch_exec(request.GET['cluster'])
     permission_list = obj.list_permission(r_data['vhost'])
     return render(request, 'rabbitmq/permission_list.html', locals())
@@ -224,3 +223,20 @@ def definitions_sync(request):
 def test_url(request, *args, **kwargs):
     return render(request, '/test/test.html', locals())
 
+
+def channel_list(request):
+    app, action = "channel", "channel列表"
+    obj = batch_exec()
+    channel_list = obj.list_channels()
+    #channel_name_list=[m['name'] for i in channel_list for k,v in i.items() for m in v]
+    channel_dic={}
+    for i in channel_list:
+        for k,v in i.items():
+            channel_name_list = []
+            for m in v:
+                channel_name_list.append(m['name'])
+                channel_dic[k]=channel_name_list
+    print(channel_dic)
+            #for k,v in j.items():
+            #    channel_name_list.append(v.name)
+    return render(request, 'test/index.html', locals())

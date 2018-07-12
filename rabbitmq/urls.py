@@ -30,6 +30,9 @@ urlpatterns = [
     url(r'^exchange/bindings/add$', binding_create, name='binding-add'),
     url(r'^exchange/bindings/delete$', binding_delete, name='binding-delete'),
 
+    # channel
+    url(r'^channel/list$', channel_list, name='channel-list'),
+
     # definitions
     url(r'^definitions/sync$', definitions_sync, name='definitions-sync'),
     url(r'^definitions/export$', definitions_sync, name='definitions-sync'),

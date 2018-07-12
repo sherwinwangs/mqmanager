@@ -3,6 +3,7 @@
 from django import template
 import urllib
 from ..settings import rabbitmq_list
+import json
 from rabbitmq.models import *
 
 register = template.Library()
@@ -19,19 +20,7 @@ def env_name(value):
 
 
 @register.filter
-def queue_consumers(queue):
-    app = QueueInfo.objects.filter(name__exact=queue)
-    if app:
-        # return view.acls.all().values_list('name')
-        return [i[0] for i in app.values_list('consumers')]
-            #list(app.values('consumers'))
-    else:
-        return '没有消费者'
-
-@register.filter
-def queue_consumers_comment(queue):
-    app = QueueInfo.objects.filter(name__exact=queue)
-    if app:
-        return [i[0] for i in app.values_list('comment')]
-    else:
-        return ''
+def queue_consumers(cluster,vhost,queue):
+    with open('/tmp/queue_detail.json','r+') as f:
+        json_str = json.load(f)
+        return json_str[cluster][vhost][queue]

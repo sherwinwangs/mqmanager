@@ -19,7 +19,7 @@ class RabbitMQAPI(object):
         self.queue_name = queue_name
         self.host_name = host_name
 
-    def call_api(self, method='GET', path='', data='',headers=[]):
+    def call_api(self, method='GET', path='', data='', headers=[]):
         '''Call the REST API and convert the results into JSON.'''
         url = '{0}://{1}:{2}/api/{3}'.format(self.protocol, self.host_name, self.port, path)
         password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -94,6 +94,10 @@ class RabbitMQAPI(object):
             message = {'tags': 'danger', 'detail': '创建队列失败:%s' % e, 'obj': queue}
         return message
 
+    def detail_queue(self, vhost, queue):
+        res = self.call_api(path='queues/%s/%s' % (urllib.quote_plus(vhost), urllib.quote_plus(queue)))
+        return res
+
     def delete_queue(self, vhost, queue):
         res = self.call_api(method='DELETE', path='queues/%s/%s' % (urllib.quote_plus(vhost), urllib.quote_plus(queue)))
         return res
@@ -151,9 +155,18 @@ class RabbitMQAPI(object):
             return False
 
     def definitions_import(self, data):
-        self.call_api(method='POST', path='definitions', data=json.dumps(data), headers=[{"content-type":"multipart/form-data"}])
+        self.call_api(method='POST', path='definitions', data=json.dumps(data),
+                      headers=[{"content-type": "multipart/form-data"}])
         message = {'tags': 'success', 'detail': '导入集群配置成功'}
         return message
+
+    def list_channels(self):
+        res = self.call_api(path='channels')
+        return res
+
+    def detail_channel(self, channel):
+        res = self.call_api(path='channels/%s' % urllib.quote_plus(channel))
+        return res
 
 
 '''
@@ -360,7 +373,151 @@ class batch_exec(RabbitMQAPI):
             res = mq_obj.definitions_import(data=data)
         return res
 
+    def detail_queue(self, vhost, queue):
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            res = mq_obj.detail_queue(vhost, queue)
+            queue_ip = {}.fromkeys(
+                [consumer['channel_details']['peer_host'] for consumer in res['consumer_details']]).keys()
+        return queue_ip
 
+    def queue_kylincluster(self, vhost, queue):
+        cluster_list = []
+        with open('/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt', 'rb') as f:
+            json_obj = json.load(f)
+            for ip in self.detail_queue(vhost, queue):
+                try:
+                    cluster_list.append(json_obj[ip])
+                except Exception,e:
+                    print("ip:%s not in cmdb" %ip)
+        return cluster_list
+
+
+def dump_queue_info():
+    cluster, vhost, queue, ip_list = "", "", "", []
+    data = {cluster: {vhost: {queue: [ip_list]}}}
+    for cluster in rabbitmq_list.keys():
+        vhost_list = [vhost['name'] for vhost in batch_exec(cluster).list_vhosts()[0][cluster]]
+        for vhost in vhost_list:
+            for queue in batch_exec(cluster).list_queues(vhost)[0][cluster]:
+                vhost = queue['vhost']
+                queue = queue['name']
+                app_list = batch_exec(cluster).queue_kylincluster(vhost, queue)
+                if not data.has_key(cluster):
+                    data[cluster] = {}
+                elif not data[cluster].has_key(vhost):
+                    data[cluster][vhost] = {}
+                else:
+                    data[cluster][vhost][queue] = app_list
+    with open('/tmp/queue_detail.json', 'w') as f:
+        f.write(json.dumps(data))
+
+    # queue_list = {queue['vhost']: queue['name'] for queue in batch_exec(i).list_queues(vhost)[0][i] if queue['name']}
+    # for queue in batch_exec(i).list_queues(vhost):
+    # print(queue)
+    # try:
+    #    print(queue['vhost'], queue['name'])
+    # except Exception,e:
+    #    print(e)
+    # print(queue)
+    # print(queue['vhost'],queue['name'])
+    # print(queue_list)
+
+    # mq_obj.list_vhosts()
+
+
+#dump_queue_info()
+# a=batch_exec('juhe-pre')
+# print(a.queue_kylincluster('/','Q_PAY_BANK_PAYMENT_IN'))
+
+'''
+    def list_channels(self):
+        channel_info = []
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            channel_info.append({k: mq_obj.list_channels()})
+        return channel_info
+
+    def detail_channel(self, channel):
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            return mq_obj.detail_channel(channel)
+
+
+class QueueDetail:
+    def __init__(self, cluster=''):
+        self.ip_cluster = '/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt'
+        self.cluster = cluster
+
+    def get_all_channel(self):
+        return batch_exec().list_channels()
+
+    def get_cluster_channel_name_list(self, cluster):
+        cluster_channels = batch_exec(cluster).list_channels()[0]
+        channel_name_list = [channel['name'] for cluster, channel_list in cluster_channels.items() for channel in
+                             channel_list]
+        return channel_name_list
+
+    def get_queue_ip_detail(self, cluster):
+        cluster_channel_name_list = self.get_cluster_channel_name_list(cluster)
+
+        vhost,queue,ip_list="","",[]
+        data = {vhost: {queue: [ip_list]}}
+        for channel in cluster_channel_name_list:
+            channel_detail = batch_exec(cluster).detail_channel(channel)
+            for content in channel_detail['consumer_details']:
+                vhost = content['queue']['vhost']
+                queue = content['queue']['name']
+                ip = content['channel_details']['peer_host']
+                #print(ip,content)
+                if not data.has_key(vhost):
+                    data[vhost]={}
+                else:
+                    if not data[vhost].has_key(queue):
+                        data[vhost][queue]=ip_list
+                    else:
+                        if ip not in data[vhost][queue]:
+                            ip_list.append(ip)
+            print(data)
+            # print({'vhost': vhost, 'queue': queue, 'ip': ip_list})
+
+
+a = QueueDetail()
+print(a.get_queue_ip_detail('juhe-pre'))
+
+
+
+def channel_info_detail():
+    file = open('/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt', 'rb')
+    json_str = json.load(file)
+    for cluster in batch_exec().list_channels():
+        for k, v in cluster.items():
+            data = {}
+            for m in v:
+                channel = batch_exec(k).detail_channel(m['name'])
+                ip_list = []
+                for i, j in enumerate(channel['consumer_details']):
+                    vhost = channel['consumer_details'][i]['queue']['vhost']
+                    queue = channel['consumer_details'][i]['queue']['name']
+                    ip = channel['consumer_details'][i]['channel_details']['peer_host']
+                    try:
+                        cluster = json_str[ip]
+                    except Exception, e:
+                        print(e)
+                    ip_list.append(ip)
+            queue_cluster = {'vhost': vhost, 'queue': queue, 'ip': ip_list, 'cluster': cluster}
+            print(queue_cluster)
+            # channel_dic[k] = channel_name_list
+    # print(channel_dic)
+    file.close()
+    return True
+
+
+# channel_info_detail()
+'''
 '''
 http://192.168.2.12:15672/api/bindings/%2F/e/E_PAY_PAYMENT_NOTIFY/q/BLPAY_BIZ_MERCHANT_APPLY_QUEUE
 binding:{"vhost":"/","source":"E_PAY_PAYMENT_NOTIFY","destination_type":"q","destination":"BLPAY_BIZ_MERCHANT_APPLY_QUEUE","routing_key":"PROCESS1","arguments":{}}
