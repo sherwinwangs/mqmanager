@@ -19,8 +19,16 @@ def env_name(value):
     return rabbitmq_list[value]['name']
 
 
-@register.filter
+@register.simple_tag
 def queue_consumers(cluster,vhost,queue):
     with open('/tmp/queue_detail.json','r+') as f:
         json_str = json.load(f)
-        return json_str[cluster][vhost][queue]
+        try:
+            #print(json_str[cluster][vhost][queue])
+            if len(json_str[cluster][vhost][queue]) != 0:
+                cluster = json_str[cluster][vhost][queue]
+            else:
+                cluster = ["没有集群"]
+        except Exception,e:
+            cluster = ["CMDB没有记录"]
+    return cluster

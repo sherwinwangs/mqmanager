@@ -10,17 +10,9 @@
     <td class="text-center">环境</td>
     <td class="text-center">虚拟主机</td>
     <td class="text-center">队列名称</td>
-    <!--<td class="text-center">状态</td>-->
     <td class="text-center">消费集群</td>
     <td class="text-center">消费者</td>
-    <td class="text-center">消息总数</td>
-    <td class="text-center">消息Ready</td>
-    <td class="text-center">消息UnAcked</td>
-    <td class="text-center">消息-入</td>
-    <td class="text-center">消息-出</td>
-    <td class="text-center">消息-ACK</td>
-    <td class="text-center">备注信息</td>
-    <td class="text-center">操作</td>
+    <td class="text-center">消息总数</td>     <td class="text-center">操作</td>
 {% endblock %}
 
 {% block table_body %}
@@ -31,17 +23,16 @@
                     <td class="text-center">{{ k |env_name }}</td>
                     <td class="text-center">{{ j.vhost }}</td>
                     <td class="text-center">{{ j.name }}</td>
-                    <!-- <td class="text-center">{{ j.state }}</td> -->
-                    <td class="text-center">{%queue_consumers k j.vhost j.name %}</td>
+                    <td class="text-center">
+                        {%queue_consumers k j.vhost j.name as consumers %}
+                        {% for consumer in consumers %}
+                            <a class="btn btn-xs btn-info">{{ consumer }}</a><br>
+                            {% endfor %}
+                    </td>
                     <td class="text-center">{{ j.consumers }}</td>
                     <td class="text-center">{{ j.messages }}</td>
-                    <td class="text-center">{{ j.messages_ready }}</td>
-                    <td class="text-center">{{ j.messages_unacknowledged }}</td>
-                    <td class="text-center">{{ j.backing_queue_status.avg_ingress_rate }}</td>
-                    <td class="text-center">{{ j.backing_queue_status.avg_egress_rate }}</td>
-                    <td class="text-center">{{ j.backing_queue_status.avg_ack_ingress_rate }}</td>
-                    <td class="text-center">xxx</td>
                     <td>
+                        <a href="{% url 'queue-detail' %}?cluster={{ k }}&vhost={{ j.vhost }}&queue={{ j.name }}" class="btn btn-xs btn-success" target="_blank">详情</a>
                         <a class="btn btn-xs btn-danger btn_queue_delete"
                            data-cluster="{{ k }}" data-vhost="{{ j.vhost }}"
                            data-queue="{{ j.name |url_encode }}">删除</a>
@@ -75,10 +66,14 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
-                    {text: '创建消息队列', action: function (e, dt, button, config) { window.location = '{% url 'queue-add' %}'; } },
-                    {extend: 'copy',text: '复制到剪贴板'},
-                    {extend: 'csv',text:'导出CSV',title: '消息队列搜索结果'},
-                    {extend: 'excel', text:'导出EXCEL',title: '消息队列搜索结果'},
+                    {
+                        text: '创建消息队列', action: function (e, dt, button, config) {
+                            window.location = '{% url 'queue-add' %}';
+                        }
+                    },
+                    {extend: 'copy', text: '复制到剪贴板'},
+                    {extend: 'csv', text: '导出CSV', title: '消息队列搜索结果'},
+                    {extend: 'excel', text: '导出EXCEL', title: '消息队列搜索结果'},
                 ], "oLanguage": { // 国际化配置
                     "sProcessing": "正在获取数据，请稍后...",
                     "sLengthMenu": "显示 _MENU_ 条",

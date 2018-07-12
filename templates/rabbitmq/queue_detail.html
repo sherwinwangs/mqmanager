@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load common_tags %}
+{% block custom_head_css_js %}
+    <link href="{% static "css/plugins/sweetalert/sweetalert.css" %}" rel="stylesheet">
+    <script src="{% static "js/plugins/sweetalert/sweetalert.min.js" %}"></script>
+{% endblock %}
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="panel-options">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="" class="text-center"><i class="fa fa-laptop"></i> 查看队列详情 </a>
+                            </li>
+                            <li class="pull-right">
+                                <a class="btn btn-outline btn-default" href="/}"><i
+                                        class="fa fa-edit"></i>Channel信息</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="col-sm-7" style="padding-left: 0;">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-title">
+                                    <span class="label label-primary"><b>{{ queue_info.state }}</b></span>
+                                    <div class="ibox-tools">
+                                        <a class="collapse-link">
+                                            <i class="fa fa-chevron-up"></i>
+                                        </a>
+                                        <a class="close-link">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="text-left">
+                                        <table class="table">
+                                            <tr class="no-borders-tr">
+                                                <td class="text-navy">MQ集群</td>
+                                                <td>{{ queue_info.cluster |env_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">虚拟主机</td>
+                                                <td>{{ queue_info.vhost }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">队列名称</td>
+                                                <td>{{ queue_info.name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">占用内存</td>
+                                                <td>{{ queue_info.memory }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">消费者数量</td>
+                                                <td>{{ queue_info.consumers }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">消息总数量</td>
+                                                <td>{{ queue_info.messages }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">消息Ready</td>
+                                                <td>{{ queue_info.messages_ready }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">消息Unacked</td>
+                                                <td>{{ queue_info.messages_unacknowledged }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">磁盘读取</td>
+                                                <td>{{ queue_info.disk_reads }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">磁盘写入</td>
+                                                <td>{{ queue_info.disk_writes }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">空闲</td>
+                                                <td>{{ queue_info.idle_since }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">主节点</td>
+                                                <td><a class="btn btn-xs btn-info">{{ queue_info.node }}</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">备节点</td>
+                                                <td>
+                                                    {% for node in queue_info.slave_nodes %}
+                                                        <a class="btn btn-xs btn-info">{{ node }}</a>
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">已同步备节点</td>
+                                                <td>
+                                                    {% for node in queue_info.synchronised_slave_nodes %}
+                                                        <a class="btn btn-xs btn-info">{{ node }}</a>
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">可恢复备节点</td>
+                                                <td>
+                                                    {% for node in queue_info.recoverable_slaves %}
+                                                        <a class="btn btn-xs btn-info">{{ node }}</a>
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">消费者应用集群</td>
+                                                <td>
+                                                    {% for cluster in queue_info.consumer_cluster_list %}
+                                                        <a class="btn btn-xs btn-info">{{ cluster }}</a>
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">消费者IP列表</td>
+                                                <td>
+                                                    {% for cluster in queue_info.consumer_ip_list %}
+                                                        <a class="btn btn-xs btn-info">{{ cluster }}</a>
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5" style="padding-left: 0;padding-right: 0">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <i class="fa fa-info-circle"></i> Channel列表
+                            </div>
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tbody>
+                                    {% for consumer in queue_info.consumer_details %}
+                                        <tr>
+                                            <td>{{ consumer.channel_details.name }}</td>
+                                        </tr>{% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

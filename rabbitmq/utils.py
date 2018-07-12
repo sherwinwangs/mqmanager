@@ -182,7 +182,7 @@ delete binding
 http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/qqq1/rtk11
 {"vhost":"/","source":"e1","destination":"qqq1","destination_type":"q","properties_key":"rtk11"}
 '''
-a = RabbitMQAPI()
+#a = RabbitMQAPI()
 
 
 # a.delete_binding(vhost='/', exchange='e1', type='q', destination='qqq1', properties_key='rtk11',
@@ -373,7 +373,15 @@ class batch_exec(RabbitMQAPI):
             res = mq_obj.definitions_import(data=data)
         return res
 
-    def detail_queue(self, vhost, queue):
+    def detail_queue(self,vhost,queue):
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            queue_info = mq_obj.detail_queue(vhost, queue)
+            queue_info['cluster']=k
+        return queue_info
+
+    def queue_consumers(self, vhost, queue):
         for k, v in self.cluster_connector_args.items():
             mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
                                  user_name=v['user_name'], password=v['password'])
@@ -386,7 +394,7 @@ class batch_exec(RabbitMQAPI):
         cluster_list = []
         with open('/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt', 'rb') as f:
             json_obj = json.load(f)
-            for ip in self.detail_queue(vhost, queue):
+            for ip in self.queue_consumers(vhost, queue):
                 try:
                     cluster_list.append(json_obj[ip])
                 except Exception,e:
@@ -413,111 +421,7 @@ def dump_queue_info():
     with open('/tmp/queue_detail.json', 'w') as f:
         f.write(json.dumps(data))
 
-    # queue_list = {queue['vhost']: queue['name'] for queue in batch_exec(i).list_queues(vhost)[0][i] if queue['name']}
-    # for queue in batch_exec(i).list_queues(vhost):
-    # print(queue)
-    # try:
-    #    print(queue['vhost'], queue['name'])
-    # except Exception,e:
-    #    print(e)
-    # print(queue)
-    # print(queue['vhost'],queue['name'])
-    # print(queue_list)
 
-    # mq_obj.list_vhosts()
-
-
-#dump_queue_info()
-# a=batch_exec('juhe-pre')
-# print(a.queue_kylincluster('/','Q_PAY_BANK_PAYMENT_IN'))
-
-'''
-    def list_channels(self):
-        channel_info = []
-        for k, v in self.cluster_connector_args.items():
-            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
-                                 user_name=v['user_name'], password=v['password'])
-            channel_info.append({k: mq_obj.list_channels()})
-        return channel_info
-
-    def detail_channel(self, channel):
-        for k, v in self.cluster_connector_args.items():
-            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
-                                 user_name=v['user_name'], password=v['password'])
-            return mq_obj.detail_channel(channel)
-
-
-class QueueDetail:
-    def __init__(self, cluster=''):
-        self.ip_cluster = '/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt'
-        self.cluster = cluster
-
-    def get_all_channel(self):
-        return batch_exec().list_channels()
-
-    def get_cluster_channel_name_list(self, cluster):
-        cluster_channels = batch_exec(cluster).list_channels()[0]
-        channel_name_list = [channel['name'] for cluster, channel_list in cluster_channels.items() for channel in
-                             channel_list]
-        return channel_name_list
-
-    def get_queue_ip_detail(self, cluster):
-        cluster_channel_name_list = self.get_cluster_channel_name_list(cluster)
-
-        vhost,queue,ip_list="","",[]
-        data = {vhost: {queue: [ip_list]}}
-        for channel in cluster_channel_name_list:
-            channel_detail = batch_exec(cluster).detail_channel(channel)
-            for content in channel_detail['consumer_details']:
-                vhost = content['queue']['vhost']
-                queue = content['queue']['name']
-                ip = content['channel_details']['peer_host']
-                #print(ip,content)
-                if not data.has_key(vhost):
-                    data[vhost]={}
-                else:
-                    if not data[vhost].has_key(queue):
-                        data[vhost][queue]=ip_list
-                    else:
-                        if ip not in data[vhost][queue]:
-                            ip_list.append(ip)
-            print(data)
-            # print({'vhost': vhost, 'queue': queue, 'ip': ip_list})
-
-
-a = QueueDetail()
-print(a.get_queue_ip_detail('juhe-pre'))
-
-
-
-def channel_info_detail():
-    file = open('/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt', 'rb')
-    json_str = json.load(file)
-    for cluster in batch_exec().list_channels():
-        for k, v in cluster.items():
-            data = {}
-            for m in v:
-                channel = batch_exec(k).detail_channel(m['name'])
-                ip_list = []
-                for i, j in enumerate(channel['consumer_details']):
-                    vhost = channel['consumer_details'][i]['queue']['vhost']
-                    queue = channel['consumer_details'][i]['queue']['name']
-                    ip = channel['consumer_details'][i]['channel_details']['peer_host']
-                    try:
-                        cluster = json_str[ip]
-                    except Exception, e:
-                        print(e)
-                    ip_list.append(ip)
-            queue_cluster = {'vhost': vhost, 'queue': queue, 'ip': ip_list, 'cluster': cluster}
-            print(queue_cluster)
-            # channel_dic[k] = channel_name_list
-    # print(channel_dic)
-    file.close()
-    return True
-
-
-# channel_info_detail()
-'''
 '''
 http://192.168.2.12:15672/api/bindings/%2F/e/E_PAY_PAYMENT_NOTIFY/q/BLPAY_BIZ_MERCHANT_APPLY_QUEUE
 binding:{"vhost":"/","source":"E_PAY_PAYMENT_NOTIFY","destination_type":"q","destination":"BLPAY_BIZ_MERCHANT_APPLY_QUEUE","routing_key":"PROCESS1","arguments":{}}
@@ -533,19 +437,3 @@ delete binding
 http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/qqq1/rtk11
 {"vhost":"/","source":"e1","destination":"qqq1","destination_type":"q","properties_key":"rtk11"}
 '''
-
-# a = RabbitMQAPI(host_name='192.168.2.11')
-# print(a.list_vhosts())
-# print(a.list_exchanges())
-# print(a.list_queues())
-# print(a.create_vhosts('ssss1'))
-# print(a.create_queue(queue='q2'))
-# b = batch_exec()
-# print(b.list_all_vhost())
-# c= b.create_vhost(['shahem7','shahe'], 'ss')
-# print(c)
-
-# a = batch_exec()
-# print(a.list_queues('csdnpay'))
-# a.list_all_vhost()
-# print(a.cluster_connector_args)

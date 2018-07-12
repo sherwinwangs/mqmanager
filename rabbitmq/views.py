@@ -204,6 +204,25 @@ def queue_delete(request):
     return HttpResponse(200)
 
 
+def queue_detail(request):
+    app, action = "消息队列", "消息队列详情"
+    r_data = request.GET
+    obj = batch_exec(r_data['cluster'])
+    queue_info = obj.detail_queue(r_data['vhost'],r_data['queue'])
+    consumer_ip_list=set([i['channel_details']['peer_host'] for i in queue_info['consumer_details']])
+    consumer_cluster_list=[]
+    with open('/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt', 'rb') as f:
+        json_obj = json.load(f)
+        for ip in consumer_ip_list:
+            try:
+                consumer_cluster_list.append(json_obj[ip])
+            except Exception,e:
+                consumer_cluster_list.append('%s在KMS没找到'%ip)
+    queue_info['consumer_ip_list']=consumer_ip_list
+    queue_info['consumer_cluster_list']=consumer_cluster_list
+    return render(request, 'rabbitmq/queue_detail.html', locals())
+
+
 def definitions_sync(request):
     app, action = "MQ集群", "集群配置同步"
     destination_cluster = request.GET.get('destination', '')
@@ -215,28 +234,12 @@ def definitions_sync(request):
         source_configuration = export_config.definitions_export()
         import_config = batch_exec(p_data['destination'])
         message = import_config.definitions_import(data=source_configuration)
-        message['detail'] += '[%s --->  %s]' %(p_data['source'],p_data['destination'])
+        message['detail'] += '[%s --->  %s]' % (p_data['source'], p_data['destination'])
         messages.append(message)
     return render(request, 'rabbitmq/definitions_sync.html', locals())
 
 
 def test_url(request, *args, **kwargs):
-    return render(request, '/test/test.html', locals())
-
-
-def channel_list(request):
-    app, action = "channel", "channel列表"
-    obj = batch_exec()
-    channel_list = obj.list_channels()
-    #channel_name_list=[m['name'] for i in channel_list for k,v in i.items() for m in v]
-    channel_dic={}
-    for i in channel_list:
-        for k,v in i.items():
-            channel_name_list = []
-            for m in v:
-                channel_name_list.append(m['name'])
-                channel_dic[k]=channel_name_list
-    print(channel_dic)
-            #for k,v in j.items():
-            #    channel_name_list.append(v.name)
-    return render(request, 'test/index.html', locals())
+    # obj = batch_exec()
+    # queue_list = obj.list_queues()
+    return render(request, 'rabbitmq/queue_detail.html', locals())

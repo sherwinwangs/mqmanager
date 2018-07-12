@@ -18,7 +18,8 @@ urlpatterns = [
     # queue
     url(r'^queue/list$', queue_list, name='queue-list'),
     url(r'^queue/add$', queue_create, name='queue-add'),
-    url(r'^queues/delete$', queue_delete, name='queue-delete'),
+    url(r'^queue/delete$', queue_delete, name='queue-delete'),
+    url(r'^queue/detail$', queue_detail, name='queue-detail'),
 
     # exchange
     url(r'^exchange/list$', exchange_list, name='exchange-list'),
@@ -30,10 +31,10 @@ urlpatterns = [
     url(r'^exchange/bindings/add$', binding_create, name='binding-add'),
     url(r'^exchange/bindings/delete$', binding_delete, name='binding-delete'),
 
-    # channel
-    url(r'^channel/list$', channel_list, name='channel-list'),
-
     # definitions
     url(r'^definitions/sync$', definitions_sync, name='definitions-sync'),
     url(r'^definitions/export$', definitions_sync, name='definitions-sync'),
+
+    # test
+    url(r'^test$', test_url, name='test'),
 ]
