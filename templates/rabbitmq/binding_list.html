@@ -30,7 +30,7 @@
                 <td align="center">
                     <a href="{% url 'mq:binding-delete' %}?cluster={{ cluster }}&vhost={{ i.vhost |url_encode }}&exchange={{ i.source }}&destination={{ i.destination }}&type={% if i.destination_type == 'queue' %}q{% elif i.destination_type == 'exchange' %}e{% endif %}&properties_key=
                             {% if i.routing_key %}{{ i.routing_key }}{% else %}~{% endif %}"
-                       class="btn btn-xs btn-danger">删除</a>
+                       class="btn btn-xs btn-danger {% if not request.user.is_superuser %} disabled{% endif %}">删除</a>
                 </td>
             </tr>
         {% endfor %}
@@ -59,11 +59,13 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
+                    {% if request.user.is_superuser %}
                     {
                         text: '添加绑定', action: function (e, dt, button, config) {
                             window.location = '{% url 'mq:binding-add' %}?cluster={{ res.cluster|url_encode }}&vhost={{ res.vhost|url_encode }}&exchange={{ res.exchange|url_encode }}';
                         }
                     },
+                    {% endif %}
                     {extend: 'copy', text: '复制到剪贴板'},
                     {extend: 'csv', text: '导出CSV', title: '权限搜索结果'},
                     {extend: 'excel', text: '导出EXCEL', title: '权限搜索结果'},

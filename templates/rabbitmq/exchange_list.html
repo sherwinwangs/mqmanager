@@ -23,14 +23,11 @@
                     <td align="center">{{ j.name }}</td>
                     <td align="center">{{ j.type }}</td>
                     <td align="center">
-                        <a href="{% url 'mq:binding-list' %}?cluster={{ k |url_encode }}&vhost={{ j.vhost | url_encode }}&exchange={{ j.name }}"
-                           class="btn btn-xs btn-success {% if j.name == '' %} disabled {% endif %}">编辑</a>
-
-                        <!-- <a href="/mq/exchanges/delete?cluster={{ k |url_encode }}&vhost={{ j.vhost | url_encode }}&exchange={{ j.name |url_encode }}"
-                           class="btn btn-xs btn-danger {% if j.name == '' %} disabled {% endif %}">删除</a>-->
-                        <a class="btn btn-xs btn-danger btn_exchange_delete{% if j.name == '' %} disabled {% endif %}"
+                        <a href="{% url 'mq:binding-list' %}?cluster={{ k |url_encode }}&vhost={{ j.vhost | url_encode }}&exchange={% if not j.name %}~{% else %}{{ j.name }}{% endif %}"
+                           class="btn btn-xs btn-info">查看绑定</a>
+                        <a class="btn btn-xs btn-danger btn_exchange_delete{% if not request.user.is_superuser %} disabled {% endif %}"
                            data-cluster="{{ k }}" data-vhost="{{ j.vhost }}"
-                           data-exchange="{{ j.name |url_encode }}">删除</a>
+                           data-exchange="{% if not j.name %}~{% else %}{{ j.name }}{% endif %}">删除</a>
                     </td>
                 </tr>
             {% endfor %}
@@ -60,10 +57,16 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
-                    {text: '创建交换机', action: function (e, dt, button, config) { window.location = '{% url 'mq:exchange-add' %}'; } },
-                    {extend: 'copy',text: '复制到剪贴板'},
-                    {extend: 'csv',text:'导出CSV',title: '交换机搜索结果'},
-                    {extend: 'excel', text:'导出EXCEL',title: '交换机搜索结果'},
+                    {% if request.user.is_superuser %}
+                        {
+                            text: '创建交换机', action: function (e, dt, button, config) {
+                                window.location = '{% url 'mq:exchange-add' %}';
+                            }
+                        },
+                    {% endif %}
+                    {extend: 'copy', text: '复制到剪贴板'},
+                    {extend: 'csv', text: '导出CSV', title: '交换机搜索结果'},
+                    {extend: 'excel', text: '导出EXCEL', title: '交换机搜索结果'},
                 ], "oLanguage": { // 国际化配置
                     "sProcessing": "正在获取数据，请稍后...",
                     "sLengthMenu": "显示 _MENU_ 条",

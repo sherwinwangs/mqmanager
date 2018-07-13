@@ -9,10 +9,10 @@ urlpatterns = [
     url(r'^logout$', user_logout, name='user-logout'),
 
     # User
-    url(r'^user$', user_logout, name='user-list'),
-    url(r'^user/create$', user_logout, name='user-list'),
-    url(r'^user/delete$', user_logout, name='user-list'),
+    url(r'^user$', user_list, name='user-list'),
+    url(r'^user/create$', user_create, name='user-create'),
+    #url(r'^user/delete$', user_logout, name='user-list'),
 
     # Profile
-    url(r'^profile/$', user_login, name='user-profile'),
+    url(r'^profile/$', user_profile, name='user-profile'),
 ]

@@ -33,7 +33,7 @@
                     <td class="text-center">{{ j.messages }}</td>
                     <td>
                         <a href="{% url 'mq:queue-detail' %}?cluster={{ k }}&vhost={{ j.vhost }}&queue={{ j.name }}" class="btn btn-xs btn-success" target="_blank">详情</a>
-                        <a class="btn btn-xs btn-danger btn_queue_delete"
+                        <a class="btn btn-xs btn-danger btn_queue_delete {% if not request.user.is_superuser %}disabled{% endif %}"
                            data-cluster="{{ k }}" data-vhost="{{ j.vhost }}"
                            data-queue="{{ j.name |url_encode }}">删除</a>
 
@@ -66,11 +66,13 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
+                    {% if request.user.is_superuser %}
                     {
                         text: '创建消息队列', action: function (e, dt, button, config) {
                             window.location = '{% url 'mq:queue-add' %}';
                         }
                     },
+                    {% endif %}
                     {extend: 'copy', text: '复制到剪贴板'},
                     {extend: 'csv', text: '导出CSV', title: '消息队列搜索结果'},
                     {extend: 'excel', text: '导出EXCEL', title: '消息队列搜索结果'},

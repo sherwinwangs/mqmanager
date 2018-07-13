@@ -29,8 +29,9 @@
             <td class="text-center">{{ j.messages_unacknowledged }}</td>
             <td class="text-center">
                 <a href="{% url 'mq:permission-list' %}?cluster={{ k }}&vhost={{ j.name }}"
-                   class="btn btn-xs btn-info">编辑</a>
-                <a class="btn btn-xs btn-danger btn_vhost_delete {% if j.name == '/' %} disabled{% endif %}"
+                   class="btn btn-xs btn-info">查看权限</a>
+
+                <a class="btn btn-xs btn-danger btn_vhost_delete {% if not request.user.is_superuser %} disabled{% endif %}"
                    data-cluster="{{ k }}" data-vhost="{{ j.name | url_encode }}">删除</a>
             </td>
             </tr>
@@ -60,11 +61,13 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
+                    {% if request.user.is_superuser %}
                     {
                         text: '创建虚拟主机', action: function (e, dt, button, config) {
                             window.location = '{% url 'mq:vhost-add' %}';
                         }
                     },
+                    {% endif %}
                     {extend: 'copy', text: '复制到剪贴板'},
                     {extend: 'csv', text: '导出CSV', title: '虚拟主机搜索结果'},
                     {extend: 'excel', text: '导出EXCEL', title: '虚拟主机搜索结果'},

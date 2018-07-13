@@ -1,0 +1,83 @@
+{% extends '_base_list.html' %}
+
+{% block help_message %}
+    <div class="alert alert-info help-message">
+        <p>{{ action }}是 该管理平台中所管理的用户</p>
+    </div>
+{% endblock %}
+
+{% block table_head %}
+    <td class="text-center">用户名</td>
+    <td class="text-center">姓名</td>
+    <td class="text-center">邮箱</td>
+    <td class="text-center">角色</td>
+    <td class="text-center">启用</td>
+    <td class="text-center">操作</td>
+{% endblock %}
+{% block table_body %}
+    {% for user in user_list %}
+        <tr>
+            <td class="text-center">{{ user.username }}</td>
+            <td class="text-center">{{ user.name }}</td>
+            <td class="text-center">{{ user.email }}</td>
+            <td class="text-center">
+                {% if user.is_superuser %}
+                    <a class="btn btn-xs btn-success">管理员</a>
+                {% else %}
+                    <a class="btn btn-xs btn-primary">普通用户</a>
+                {% endif %}
+            </td>
+            <td class="text-center">
+                {% if user.is_active %}
+                    <i class="fa fa-check text-navy"></i>
+                {% else %}
+                    <i class="fa fa-circle text-danger"></i>
+                {% endif %}
+            </td>
+            <td class="text-center">
+                <a href="#" class="btn btn-xs btn-info">编辑</a>
+                <a href="#" class="btn btn-xs btn-danger">删除</a></td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+{% block custom_foot_js %}
+    <script>
+        $(document).ready(function () {
+            $('.dataTables-example').DataTable({
+                pageLength: 25,
+                responsive: true,
+                //dom: '<"html5buttons"B>lTfgitp',
+                //dom: '<"html5buttons"B><"top"f>rt<"bottom"pli><"clear">',
+                dom: 'Blfrtip',
+                buttons: [
+                    { text: '添加用户', action: function (e, dt, button, config) {
+                            window.location = '{% url 'users:user-create' %}';
+                        }
+                    },
+                    {extend: 'copy', text: '复制到剪贴板', title: '用户列表'},
+                    {extend: 'csv', text: '导出CSV', title: '用户列表'},
+                    {extend: 'excel', text: '导出EXCEL', title: '用户列表'},
+                ], "oLanguage": { // 国际化配置
+                    "sProcessing": "正在获取数据，请稍后...",
+                    "sLengthMenu": "显示 _MENU_ 条",
+                    "sZeroRecords": "没有找到数据",
+                    "sInfo": "从 _START_ 到  _END_ 条记录 总记录数为 _TOTAL_ 条",
+                    "sInfoEmpty": "记录数为0",
+                    "sInfoFiltered": "(全部记录数 _MAX_ 条)",
+                    "sInfoPostFix": "",
+                    "sSearch": "搜索",
+                    "sUrl": "",
+                    "oPaginate": {
+                        "sFirst": "第一页",
+                        "sPrevious": "上一页",
+                        "sNext": "下一页",
+                        "sLast": "最后一页"
+                    }
+                }
+
+            });
+
+        });
+    </script>
+{% endblock %}

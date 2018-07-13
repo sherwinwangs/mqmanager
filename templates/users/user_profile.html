@@ -25,7 +25,7 @@
                         <div class="col-sm-7" style="padding-left: 0;">
                             <div class="ibox float-e-margins">
                                 <div class="ibox-title">
-                                    <span class="label label-primary"><b>admin</b></span>
+                                    <span class="label label-primary"><b>{{ request.user }}</b></span>
                                     <div class="ibox-tools">
                                         <a class="collapse-link">
                                             <i class="fa fa-chevron-up"></i>
@@ -40,20 +40,30 @@
                                         <table class="table">
                                             <tr class="no-borders-tr">
                                                 <td colspan="2">
-                                                    <img src="/static/img/avatar/admin.png" class="img-circle" width="64"
+                                                    <img src="/static/img/avatar/admin.png" class="img-circle"
+                                                         width="64"
                                                          height="64">
                                                 </td>
                                             </tr>
                                             <tr class="no-borders-tr">
                                                 <td class="text-navy">用户名</td>
-                                                <td>admin</td>
+                                                <td>{{ request.user }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="text-navy">姓名</td>
-                                                <td>管理员</td>
+                                                <td>{{ request.user.name }}</td>
                                             </tr>
-                                            <td class="text-navy">邮箱</td>
-                                            <td>admin@aaa.com</td>
+                                            <tr>
+                                                <td class="text-navy">邮箱</td>
+                                                <td>{{ request.user.email }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-navy">角色</td>
+                                                {% if request.user.is_superuser %}
+                                                    <td>管理员</td>
+                                                {% else %}
+                                                    <td>普通用户</td>
+                                                {% endif %}
                                             </tr>
                                         </table>
                                     </div>

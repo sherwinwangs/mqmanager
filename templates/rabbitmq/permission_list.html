@@ -29,7 +29,7 @@
             <td align="center">{{ i.write }}</td>
             <td align="center">{{ i.read }}</td>
             <td align="center">
-                <a class="btn btn-xs btn-danger btn_permission_delete" data-cluster="{{ r_data.cluster }}" data-vhost="{{ i.vhost }}" data-username="{{ i.user }}">删除</a>
+                <a class="btn btn-xs btn-danger btn_permission_delete {% if not request.user.is_superuser %}disabled{% endif %}" data-cluster="{{ r_data.cluster }}" data-vhost="{{ i.vhost }}" data-username="{{ i.user }}">删除</a>
             </td>
         </tr>
     {% endfor %}
@@ -56,11 +56,13 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
+                    {% if request.user.is_superuser %}
                     {
                         text: '添加权限', action: function (e, dt, button, config) {
                             window.location = '{% url 'mq:permission-add' %}?cluster={{ r_data.cluster }}&vhost={{ r_data.vhost }}';
                         }
                     },
+                    {% endif %}
                     {extend: 'copy', text: '复制到剪贴板'},
                     {extend: 'csv', text: '导出CSV', title: '权限搜索结果'},
                     {extend: 'excel', text: '导出EXCEL', title: '权限搜索结果'},
