@@ -23,7 +23,7 @@
                     <td align="center">{{ j.name }}</td>
                     <td align="center">{{ j.type }}</td>
                     <td align="center">
-                        <a href="{% url 'binding-list' %}?cluster={{ k |url_encode }}&vhost={{ j.vhost | url_encode }}&exchange={{ j.name }}"
+                        <a href="{% url 'mq:binding-list' %}?cluster={{ k |url_encode }}&vhost={{ j.vhost | url_encode }}&exchange={{ j.name }}"
                            class="btn btn-xs btn-success {% if j.name == '' %} disabled {% endif %}">编辑</a>
 
                         <!-- <a href="/mq/exchanges/delete?cluster={{ k |url_encode }}&vhost={{ j.vhost | url_encode }}&exchange={{ j.name |url_encode }}"
@@ -45,7 +45,7 @@
             var cluster = $this.data('cluster');
             var vhost = $this.data('vhost');
             var exchange = $this.data('exchange');
-            var url = '{% url 'exchange-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&exchange=exchange0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("exchange0000000000", exchange);
+            var url = '{% url 'mq:exchange-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&exchange=exchange0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("exchange0000000000", exchange);
             var content = cluster + '集群的虚拟主机:' + vhost + '上的交换机:' + exchange;
             objectDeleteGet($this, url, content)
         });
@@ -60,7 +60,7 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
-                    {text: '创建交换机', action: function (e, dt, button, config) { window.location = '{% url 'exchange-add' %}'; } },
+                    {text: '创建交换机', action: function (e, dt, button, config) { window.location = '{% url 'mq:exchange-add' %}'; } },
                     {extend: 'copy',text: '复制到剪贴板'},
                     {extend: 'csv',text:'导出CSV',title: '交换机搜索结果'},
                     {extend: 'excel', text:'导出EXCEL',title: '交换机搜索结果'},

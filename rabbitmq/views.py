@@ -6,19 +6,17 @@ from django.shortcuts import render, HttpResponse
 from mqmanager.settings import rabbitmq_list
 from .utils import *
 from django.http import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 
 
-def dashboard(request):
-    app, action = "仪表盘", "仪表盘"
-    return render(request, 'index.html', locals())
-
-
+@login_required
 def cluster_list(request):
     app, action = "MQ集群", "集群列表"
     mq_cluster = rabbitmq_list
     return render(request, 'rabbitmq/cluster_list.html', locals())
 
 
+@login_required
 def vhost_list(request):
     app, action = "虚拟主机", "虚拟主机列表"
     vhost_obj = batch_exec()
@@ -26,6 +24,7 @@ def vhost_list(request):
     return render(request, 'rabbitmq/vhost_list.html', locals())
 
 
+@login_required
 def vhost_create(request):
     app, action = "虚拟主机", "创建虚拟主机"
     r_data = request.POST
@@ -35,6 +34,7 @@ def vhost_create(request):
     return render(request, 'rabbitmq/vhost_create.html', locals())
 
 
+@login_required
 def vhost_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
@@ -43,6 +43,7 @@ def vhost_delete(request):
     return HttpResponse(200)
 
 
+@login_required
 def permission_list(request):
     app, action = "虚拟主机", "虚拟主机权限列表"
     r_data = request.GET
@@ -51,6 +52,7 @@ def permission_list(request):
     return render(request, 'rabbitmq/permission_list.html', locals())
 
 
+@login_required
 def permission_create(request):
     app, action = "虚拟主机", "虚拟主机权限添加"
     f_data = request.GET
@@ -64,6 +66,7 @@ def permission_create(request):
     return render(request, 'rabbitmq/permission_create.html', locals())
 
 
+@login_required
 def permission_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
@@ -73,11 +76,13 @@ def permission_delete(request):
     return HttpResponse(200)
 
 
+@login_required
 def user_list(request):
     app, action = "用户", "用户列表"
     return True
 
 
+@login_required
 def exchange_list(request):
     app, action = "交换机", "交换机列表"
     exchange_obj = batch_exec()
@@ -85,6 +90,7 @@ def exchange_list(request):
     return render(request, 'rabbitmq/exchange_list.html', locals())
 
 
+@login_required
 def exchange_create(request):
     app, action = "交换机", "创建交换机"
     mq_clusters_list = {k: v['name'] for k, v in rabbitmq_list.items()}
@@ -102,6 +108,7 @@ def exchange_create(request):
     return render(request, 'rabbitmq/exchange_create.html', locals())
 
 
+@login_required
 def binding_list(request):
     app, action = "交换机", "交换机绑定"
     res = request.GET
@@ -110,6 +117,7 @@ def binding_list(request):
     return render(request, 'rabbitmq/binding_list.html', locals())
 
 
+@login_required
 def binding_create(request):
     app, action = "交换机", "添加绑定"
     f_data = request.GET
@@ -126,19 +134,7 @@ def binding_create(request):
     return render(request, 'rabbitmq/binding_create.html', locals())
 
 
-'''
-    def create_binding(self, vhost, exchange, type, destination, data={}):
-        messages = []
-        for k, v in self.cluster_connector_args.items():
-            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
-                                 user_name=v['user_name'], password=v['password'])
-            res = mq_obj.create_binding(vhost, exchange, type, destination, data=data)
-            res['detail'] = k + ':' + res['detail']
-            messages.append(res)
-        return messages
-'''
-
-
+@login_required
 def binding_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
@@ -150,6 +146,7 @@ def binding_delete(request):
         r_data['cluster'], r_data['vhost'], r_data['exchange']))
 
 
+@login_required
 def exchange_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
@@ -158,6 +155,7 @@ def exchange_delete(request):
     return HttpResponse(200)
 
 
+@login_required
 def queue_list(request):
     app, action = "队列", "队列列表"
     obj = batch_exec()
@@ -165,6 +163,7 @@ def queue_list(request):
     return render(request, 'rabbitmq/queue_list.html', locals())
 
 
+@login_required
 def queue_create(request):
     app, action = "消息队列", "创建消息队列"
     mq_clusters_list = {k: v['name'] for k, v in rabbitmq_list.items()}
@@ -197,6 +196,7 @@ def queue_create(request):
     return render(request, 'rabbitmq/queue_create.html', locals())
 
 
+@login_required
 def queue_delete(request):
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
@@ -204,25 +204,27 @@ def queue_delete(request):
     return HttpResponse(200)
 
 
+@login_required
 def queue_detail(request):
     app, action = "消息队列", "消息队列详情"
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
-    queue_info = obj.detail_queue(r_data['vhost'],r_data['queue'])
-    consumer_ip_list=set([i['channel_details']['peer_host'] for i in queue_info['consumer_details']])
-    consumer_cluster_list=[]
+    queue_info = obj.detail_queue(r_data['vhost'], r_data['queue'])
+    consumer_ip_list = set([i['channel_details']['peer_host'] for i in queue_info['consumer_details']])
+    consumer_cluster_list = []
     with open('/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt', 'rb') as f:
         json_obj = json.load(f)
         for ip in consumer_ip_list:
             try:
                 consumer_cluster_list.append(json_obj[ip])
-            except Exception,e:
-                consumer_cluster_list.append('%s在KMS没找到'%ip)
-    queue_info['consumer_ip_list']=consumer_ip_list
-    queue_info['consumer_cluster_list']=consumer_cluster_list
+            except Exception, e:
+                consumer_cluster_list.append('%s在KMS没找到' % ip)
+    queue_info['consumer_ip_list'] = consumer_ip_list
+    queue_info['consumer_cluster_list'] = consumer_cluster_list
     return render(request, 'rabbitmq/queue_detail.html', locals())
 
 
+@login_required
 def definitions_sync(request):
     app, action = "MQ集群", "集群配置同步"
     destination_cluster = request.GET.get('destination', '')
@@ -239,6 +241,7 @@ def definitions_sync(request):
     return render(request, 'rabbitmq/definitions_sync.html', locals())
 
 
+@login_required
 def test_url(request, *args, **kwargs):
     # obj = batch_exec()
     # queue_list = obj.list_queues()

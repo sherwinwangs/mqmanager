@@ -41,7 +41,7 @@
             var cluster = $this.data('cluster');
             var vhost = $this.data('vhost');
             var username = $this.data('username');
-            var url = '{% url 'permission-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&username=username0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("username0000000000", username);
+            var url = '{% url 'mq:permission-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&username=username0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("username0000000000", username);
             var content = cluster + '集群的用户' + username + '访问虚拟主机' + vhost + '的权限'
             objectDeleteGet($this, url, content);
         });
@@ -58,7 +58,7 @@
                 buttons: [
                     {
                         text: '添加权限', action: function (e, dt, button, config) {
-                            window.location = '{% url 'permission-add' %}?cluster={{ r_data.cluster }}&vhost={{ r_data.vhost }}';
+                            window.location = '{% url 'mq:permission-add' %}?cluster={{ r_data.cluster }}&vhost={{ r_data.vhost }}';
                         }
                     },
                     {extend: 'copy', text: '复制到剪贴板'},

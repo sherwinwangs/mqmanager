@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mqmanager',
     'rabbitmq',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -120,7 +121,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 # TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
-
+LOGIN_URL = '/users/login'
 rabbitmq_list = {
     "juhe-shahe-pro": {
         "name": "聚合沙河-生产",

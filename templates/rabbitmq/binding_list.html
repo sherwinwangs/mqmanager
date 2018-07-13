@@ -28,7 +28,7 @@
                 <td align="center">{{ i.routing_key }}</td>
                 <td align="center">{{ i.arguments }}</td>
                 <td align="center">
-                    <a href="{% url 'binding-delete' %}?cluster={{ cluster }}&vhost={{ i.vhost |url_encode }}&exchange={{ i.source }}&destination={{ i.destination }}&type={% if i.destination_type == 'queue' %}q{% elif i.destination_type == 'exchange' %}e{% endif %}&properties_key=
+                    <a href="{% url 'mq:binding-delete' %}?cluster={{ cluster }}&vhost={{ i.vhost |url_encode }}&exchange={{ i.source }}&destination={{ i.destination }}&type={% if i.destination_type == 'queue' %}q{% elif i.destination_type == 'exchange' %}e{% endif %}&properties_key=
                             {% if i.routing_key %}{{ i.routing_key }}{% else %}~{% endif %}"
                        class="btn btn-xs btn-danger">删除</a>
                 </td>
@@ -44,7 +44,7 @@
             var cluster = $this.data('cluster');
             var vhost = $this.data('vhost');
             var username = $this.data('username');
-            var url = '{% url 'permission-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&username=username0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("username0000000000", username);
+            var url = '{% url 'mq:permission-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&username=username0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("username0000000000", username);
             var content = cluster + '集群的用户' + username + '访问虚拟主机' + vhost + '的权限'
             objectDeleteGet($this, url, content);
         });
@@ -61,7 +61,7 @@
                 buttons: [
                     {
                         text: '添加绑定', action: function (e, dt, button, config) {
-                            window.location = '{% url 'binding-add' %}?cluster={{ res.cluster|url_encode }}&vhost={{ res.vhost|url_encode }}&exchange={{ res.exchange|url_encode }}';
+                            window.location = '{% url 'mq:binding-add' %}?cluster={{ res.cluster|url_encode }}&vhost={{ res.vhost|url_encode }}&exchange={{ res.exchange|url_encode }}';
                         }
                     },
                     {extend: 'copy', text: '复制到剪贴板'},

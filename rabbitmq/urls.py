@@ -1,6 +1,8 @@
 from django.conf.urls import url
 from .views import *
 
+app_name = 'mq'
+
 urlpatterns = [
     # cluster
     url(r'^cluster/list$', cluster_list, name='cluster-list'),

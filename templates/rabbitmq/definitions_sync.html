@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load common_tags %}
 {% block help_message %}
     <div class="alert alert-info help-message">
         <p>{{ action }}是 用来同步某个MQ集群中的(除了消息)所有配置信息(交换、队列、绑定、用户、虚拟主机、权限和参数)到另一个集群的工具。</p>
@@ -43,7 +44,7 @@
                                     <select name="source" class="form-control">
                                         {% for cluster in cluster_list %}
                                             {% if cluster != destination_cluster %}
-                                                <option value="{{ cluster }}">{{ cluster }}</option>
+                                                <option value="{{ cluster }}">{{ cluster |env_name}}</option>
                                             {% endif %}
                                         {% endfor %}
                                     </select>
@@ -55,7 +56,7 @@
                                 <div class="col-sm-8">
                                     <select name="destination" class="form-control">
                                         <option value="{{ destination_cluster }}"
-                                                selected>{{ destination_cluster }}</option>
+                                                selected>{{ destination_cluster |env_name}}</option>
                                     </select>
                                 </div>
                             </div>

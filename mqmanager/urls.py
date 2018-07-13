@@ -23,4 +23,5 @@ urlpatterns = [
 
     # mq
     url(r'^mq/', include("rabbitmq.urls")),
+    url(r'^users/', include("users.urls")),
 ]

@@ -32,7 +32,7 @@
                     <td class="text-center">{{ j.consumers }}</td>
                     <td class="text-center">{{ j.messages }}</td>
                     <td>
-                        <a href="{% url 'queue-detail' %}?cluster={{ k }}&vhost={{ j.vhost }}&queue={{ j.name }}" class="btn btn-xs btn-success" target="_blank">详情</a>
+                        <a href="{% url 'mq:queue-detail' %}?cluster={{ k }}&vhost={{ j.vhost }}&queue={{ j.name }}" class="btn btn-xs btn-success" target="_blank">详情</a>
                         <a class="btn btn-xs btn-danger btn_queue_delete"
                            data-cluster="{{ k }}" data-vhost="{{ j.vhost }}"
                            data-queue="{{ j.name |url_encode }}">删除</a>
@@ -51,7 +51,7 @@
             var cluster = $this.data('cluster');
             var vhost = $this.data('vhost');
             var queue = $this.data('queue');
-            var url = '{% url 'queue-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&queue=queue0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("queue0000000000", queue);
+            var url = '{% url 'mq:queue-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&queue=queue0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("queue0000000000", queue);
             var content = cluster + '集群的虚拟主机:' + vhost + '上的队列:' + queue;
             objectDeleteGet($this, url, content)
         });
@@ -68,7 +68,7 @@
                 buttons: [
                     {
                         text: '创建消息队列', action: function (e, dt, button, config) {
-                            window.location = '{% url 'queue-add' %}';
+                            window.location = '{% url 'mq:queue-add' %}';
                         }
                     },
                     {extend: 'copy', text: '复制到剪贴板'},
