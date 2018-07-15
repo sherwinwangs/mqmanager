@@ -30,7 +30,8 @@ def vhost_create(request):
     r_data = request.POST
     mq_clusters_list = {k: v['name'] for k, v in rabbitmq_list.items()}
     obj = batch_exec(r_data.getlist('cluster', ''))
-    messages = obj.create_vhost(r_data.get('vhost', ''))
+    vhost=r_data.get('vhost', '').strip()
+    messages = obj.create_vhost(vhost)
     return render(request, 'rabbitmq/vhost_create.html', locals())
 
 
@@ -101,10 +102,10 @@ def exchange_create(request):
         f_data = request.POST
         arguments_list_str = ["alternate-exchange"]
         arguments_dic_str = {k: str(v) for k, v in f_data.items() if k in arguments_list_str and v}
-        data = {"vhost": f_data['vhost'], "name": f_data['name'], "type": f_data['type'], "durable": f_data['durable'],
+        data = {"vhost": f_data['vhost'], "name": f_data['name'].strip(), "type": f_data['type'], "durable": f_data['durable'],
                 "auto_delete": f_data['auto_delete'], "internal": f_data['internal'], "arguments": arguments_dic_str}
         obj = batch_exec(mq_clusters_selectd)
-        messages = obj.create_exchange(vhost=data['vhost'], exchange=data['name'], data=data)
+        messages = obj.create_exchange(vhost=data['vhost'], exchange=data['name'].strip(), data=data)
     return render(request, 'rabbitmq/exchange_create.html', locals())
 
 
@@ -142,8 +143,7 @@ def binding_delete(request):
             "destination_type": r_data['type'], "properties_key": r_data['properties_key']}
     obj.delete_binding(r_data['vhost'], r_data['exchange'], r_data['type'], r_data['destination'],
                        r_data['properties_key'], data=data)
-    return HttpResponseRedirect('/exchanges/bindings/list?cluster=%s&vhost=%s&exchange=%s' % (
-        r_data['cluster'], r_data['vhost'], r_data['exchange']))
+    return HttpResponse(200)
 
 
 @require_role(role='admin')
@@ -179,16 +179,16 @@ def queue_create(request):
         arguments_dic_int = {k: int(v) for k, v in f_data.items() if k in arguments_list_int and v}
         arguments_dic_str = {k: str(v) for k, v in f_data.items() if k in arguments_list_str and v}
         arguments_dic = dict(arguments_dic_int, **arguments_dic_str)
-        data = {"vhost": f_data['vhost'], "name": f_data['name'], "durable": f_data['durable'],
+        data = {"vhost": f_data['vhost'], "name": f_data['name'].strip(), "durable": f_data['durable'],
                 "auto_delete": f_data['auto_delete'], "arguments": arguments_dic}
         obj = batch_exec(f_data.getlist('cluster', ''))
-        create_queue_messages = obj.create_queue(vhost=data['vhost'], queue=data['name'], data=data)
+        create_queue_messages = obj.create_queue(vhost=data['vhost'], queue=data['name'].strip(), data=data)
         if f_data['exchange'] and f_data['routing_key']:
             binding_data = {"vhost": f_data['vhost'], "source": f_data['exchange'], "destination_type": "q",
-                            "destination": f_data['name'], "routing_key": f_data['routing_key'],
+                            "destination": f_data['name'], "routing_key": f_data['routing_key'].strip(),
                             "arguments": {}}
             create_binding_messages = obj.create_binding(vhost=f_data['vhost'], exchange=f_data['exchange'], type="q",
-                                                         destination=f_data['name'],
+                                                         destination=f_data['name'].strip(),
                                                          data=binding_data)
             messages = create_queue_messages + create_binding_messages
         else:
@@ -212,7 +212,7 @@ def queue_detail(request):
     queue_info = obj.detail_queue(r_data['vhost'], r_data['queue'])
     consumer_ip_list = set([i['channel_details']['peer_host'] for i in queue_info['consumer_details']])
     consumer_cluster_list = []
-    with open('/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt', 'rb') as f:
+    with open(DATA_TMP_DIR + '/cmdb.json', 'rb') as f:
         json_obj = json.load(f)
         for ip in consumer_ip_list:
             try:

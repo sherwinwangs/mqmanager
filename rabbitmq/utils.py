@@ -4,7 +4,7 @@ import logging
 import urllib
 import urllib2
 import json
-from mqmanager.settings import rabbitmq_list
+from mqmanager.settings import rabbitmq_list, DATA_TMP_DIR
 
 
 class RabbitMQAPI(object):
@@ -95,7 +95,10 @@ class RabbitMQAPI(object):
         return message
 
     def detail_queue(self, vhost, queue):
-        res = self.call_api(path='queues/%s/%s' % (urllib.quote_plus(vhost), urllib.quote_plus(queue)))
+        try:
+            res = self.call_api(path='queues/%s/%s' % (urllib.quote_plus(vhost), urllib.quote_plus(queue)))
+        except Exception,e:
+            print(e)
         return res
 
     def delete_queue(self, vhost, queue):
@@ -169,41 +172,7 @@ class RabbitMQAPI(object):
         return res
 
 
-'''
-http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/q1
-{"vhost":"/","source":"e1","destination_type":"q","destination":"q1","routing_key":"PROCESS1","arguments":{}}
-http://192.168.2.12:15672/api/bindings/%2F/e/E_PAY_PAYMENT_NOTIFY/q/BLPAY_BIZ_MERCHANT_APPLY_QUEUE
-binding:{"vhost":"/","source":"E_PAY_PAYMENT_NOTIFY","destination_type":"q","destination":"BLPAY_BIZ_MERCHANT_APPLY_QUEUE","routing_key":"PROCESS1","arguments":{}}
-
-http://192.168.2.12:15672/api/bindings/%2F/e/E_PAY_PAYMENT_NOTIFY/e/E_PAY_ANTIFRAUD_LOCAL
-{"vhost":"/","source":"E_PAY_PAYMENT_NOTIFY","destination_type":"e","destination":"E_PAY_ANTIFRAUD_LOCAL","routing_key":"PROCESS2","arguments":{}}
-
-delete binding
-http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/qqq1/rtk11
-{"vhost":"/","source":"e1","destination":"qqq1","destination_type":"q","properties_key":"rtk11"}
-'''
-#a = RabbitMQAPI()
-
-
-# a.delete_binding(vhost='/', exchange='e1', type='q', destination='qqq1', properties_key='rtk11',
-#                 data={"vhost": "/", "source": "e1", "destination": "qqq1", "destination_type": "q",
-#                      "properties_key": "rtk11"})
-
-
-# a.create_binding('/','e1','q','q1',data={"vhost":"/","source":"e1","destination_type":"q","destination":"q1","routing_key":"PROCESS1","arguments":{}})
-# a.create_binding('/','e1','e','e1',data={"vhost":"/","source":"e1","destination_type":"e","destination":"e1","routing_key":"PROCESS1","arguments":{}})
-# a.create_binding('/','e1','e','e2',data={"vhost":"/","source":"e1","destination_type":"e","destination":"e2","routing_key":"PROCESS1","arguments":{}})
-
-# a.create_exchange('csdnpay', 'csdnpay_e2',{"vhost":"csdnpay","name":"csdnpay_e2","type":"fanout","durable":"true","auto_delete":"false","internal":"false","arguments":{"alternate-exchange":"E_PAY_TRADE_LOCAL"}})
-
-
-# a.delete_queue('csdnpay', 'csdnpay_q11')
-# a.delete_vhost('test5')
-# a.create_queue(vhost='/', queue='q9')
-# /api/queues/vhost/name
-# /api/queues/vhost/name
-# http://192.168.2.12:15672/api/queues/csdnpay/csdnpay_q8
-# (u'http://192.168.2.12:15672/api/queues/csdnpay/csdnpay_q11', u'PUT', '{"vhost": "csdnpay", "durable": "true", "name": "csdnpay_q11", "auto_delete": "false", "arguments": {}}')
+# batch exec on selectd cluster
 class batch_exec(RabbitMQAPI):
     def __init__(self, cluster_selected=rabbitmq_list):
         self.cluster_all = rabbitmq_list
@@ -373,12 +342,12 @@ class batch_exec(RabbitMQAPI):
             res = mq_obj.definitions_import(data=data)
         return res
 
-    def detail_queue(self,vhost,queue):
+    def detail_queue(self, vhost, queue):
         for k, v in self.cluster_connector_args.items():
             mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
                                  user_name=v['user_name'], password=v['password'])
             queue_info = mq_obj.detail_queue(vhost, queue)
-            queue_info['cluster']=k
+            queue_info['cluster'] = k
         return queue_info
 
     def queue_consumers(self, vhost, queue):
@@ -392,13 +361,13 @@ class batch_exec(RabbitMQAPI):
 
     def queue_kylincluster(self, vhost, queue):
         cluster_list = []
-        with open('/Users/sherwin/Development/Python/Pydev/mqmanager/rabbitmq/ip.txt', 'rb') as f:
+        with open(DATA_TMP_DIR + '/cmdb.json', 'rb') as f:
             json_obj = json.load(f)
             for ip in self.queue_consumers(vhost, queue):
                 try:
                     cluster_list.append(json_obj[ip])
-                except Exception,e:
-                    print("ip:%s not in cmdb" %ip)
+                except Exception, e:
+                    cluster_list.append("CMDB:%s" % ip)
         return cluster_list
 
 
@@ -413,16 +382,64 @@ def dump_queue_info():
                 queue = queue['name']
                 app_list = batch_exec(cluster).queue_kylincluster(vhost, queue)
                 if not data.has_key(cluster):
-                    data[cluster] = {}
-                elif not data[cluster].has_key(vhost):
-                    data[cluster][vhost] = {}
-                else:
-                    data[cluster][vhost][queue] = app_list
-    with open('/tmp/queue_detail.json', 'w') as f:
+                    data[cluster]={}
+                if not data[cluster].has_key(vhost):
+                    data[cluster][vhost]={}
+                if not data[cluster][vhost].has_key(queue):
+                    data[cluster][vhost][queue]=app_list
+    with open(DATA_TMP_DIR + '/queue_detail.json', 'w') as f:
         f.write(json.dumps(data))
 
 
+#dump_queue_info()
+
 '''
+http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/q1
+{"vhost":"/","source":"e1","destination_type":"q","destination":"q1","routing_key":"PROCESS1","arguments":{}}
+http://192.168.2.12:15672/api/bindings/%2F/e/E_PAY_PAYMENT_NOTIFY/q/BLPAY_BIZ_MERCHANT_APPLY_QUEUE
+binding:{"vhost":"/","source":"E_PAY_PAYMENT_NOTIFY","destination_type":"q","destination":"BLPAY_BIZ_MERCHANT_APPLY_QUEUE","routing_key":"PROCESS1","arguments":{}}
+
+http://192.168.2.12:15672/api/bindings/%2F/e/E_PAY_PAYMENT_NOTIFY/e/E_PAY_ANTIFRAUD_LOCAL
+{"vhost":"/","source":"E_PAY_PAYMENT_NOTIFY","destination_type":"e","destination":"E_PAY_ANTIFRAUD_LOCAL","routing_key":"PROCESS2","arguments":{}}
+
+delete binding
+http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/qqq1/rtk11
+{"vhost":"/","source":"e1","destination":"qqq1","destination_type":"q","properties_key":"rtk11"}
+'''
+
+
+# a = RabbitMQAPI()
+
+
+# a.delete_binding(vhost='/', exchange='e1', type='q', destination='qqq1', properties_key='rtk11',
+#                 data={"vhost": "/", "source": "e1", "destination": "qqq1", "destination_type": "q",
+#                      "properties_key": "rtk11"})
+
+
+# a.create_binding('/','e1','q','q1',data={"vhost":"/","source":"e1","destination_type":"q","destination":"q1","routing_key":"PROCESS1","arguments":{}})
+# a.create_binding('/','e1','e','e1',data={"vhost":"/","source":"e1","destination_type":"e","destination":"e1","routing_key":"PROCESS1","arguments":{}})
+# a.create_binding('/','e1','e','e2',data={"vhost":"/","source":"e1","destination_type":"e","destination":"e2","routing_key":"PROCESS1","arguments":{}})
+
+# a.create_exchange('csdnpay', 'csdnpay_e2',{"vhost":"csdnpay","name":"csdnpay_e2","type":"fanout","durable":"true","auto_delete":"false","internal":"false","arguments":{"alternate-exchange":"E_PAY_TRADE_LOCAL"}})
+
+
+# a.delete_queue('csdnpay', 'csdnpay_q11')
+# a.delete_vhost('test5')
+# a.create_queue(vhost='/', queue='q9')
+# /api/queues/vhost/name
+# /api/queues/vhost/name
+# http://192.168.2.12:15672/api/queues/csdnpay/csdnpay_q8
+# (u'http://192.168.2.12:15672/api/queues/csdnpay/csdnpay_q11', u'PUT', '{"vhost": "csdnpay", "durable": "true", "name": "csdnpay_q11", "auto_delete": "false", "arguments": {}}')
+'''
+字典：
+
+                #if not data.has_key(cluster):
+                #    data[cluster] = {}
+                #elif not data[cluster].has_key(vhost):
+                #    data[cluster][vhost] = {}
+                #else:
+                #    data[cluster][vhost][queue] = app_list
+                
 http://192.168.2.12:15672/api/bindings/%2F/e/E_PAY_PAYMENT_NOTIFY/q/BLPAY_BIZ_MERCHANT_APPLY_QUEUE
 binding:{"vhost":"/","source":"E_PAY_PAYMENT_NOTIFY","destination_type":"q","destination":"BLPAY_BIZ_MERCHANT_APPLY_QUEUE","routing_key":"PROCESS1","arguments":{}}
         {'source': u'csdnpay_ee2', 'destination': u'csdnpay_q1', 'routing_key': u'rtkk', 'vhost': u'csdnpay', 'arguments': {}, 'destination_type': u'q'}

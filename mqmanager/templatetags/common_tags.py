@@ -2,9 +2,8 @@
 
 from django import template
 import urllib
-from ..settings import rabbitmq_list
+from ..settings import rabbitmq_list, DATA_TMP_DIR
 import json
-from rabbitmq.models import *
 
 register = template.Library()
 
@@ -20,15 +19,14 @@ def env_name(value):
 
 
 @register.simple_tag
-def queue_consumers(cluster,vhost,queue):
-    with open('/tmp/queue_detail.json','r+') as f:
+def queue_consumers(cluster, vhost, queue):
+    with open(DATA_TMP_DIR + '/queue_detail.json', 'r+') as f:
         json_str = json.load(f)
         try:
-            #print(json_str[cluster][vhost][queue])
             if len(json_str[cluster][vhost][queue]) != 0:
                 cluster = json_str[cluster][vhost][queue]
             else:
                 cluster = ["没有集群"]
-        except Exception,e:
-            cluster = ["CMDB没有记录"]
+        except Exception, e:
+            cluster = ["没有缓存"]
     return cluster

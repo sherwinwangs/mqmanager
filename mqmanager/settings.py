@@ -122,6 +122,7 @@ STATICFILES_DIRS = (
 )
 # TEMPLATE_DIRS = (os.path.join(BASE_DIR, 'templates'),)
 LOGIN_URL = '/users/login'
+DATA_TMP_DIR = os.path.join(BASE_DIR, 'tmp')
 rabbitmq_list = {
     "juhe-shahe-pro": {
         "name": "聚合沙河-生产",
@@ -137,6 +138,7 @@ rabbitmq_list = {
         "password": "guest",
         "node_list": ['192.168.2.12'],
     },
+
     "juhe-pre": {
         "name": "聚合-线上预发布",
         "api_url": "http://shmq-pre.qianbao-inc.com:80",

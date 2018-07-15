@@ -28,9 +28,21 @@
                 <td align="center">{{ i.routing_key }}</td>
                 <td align="center">{{ i.arguments }}</td>
                 <td align="center">
-                    <a href="{% url 'mq:binding-delete' %}?cluster={{ cluster }}&vhost={{ i.vhost |url_encode }}&exchange={{ i.source }}&destination={{ i.destination }}&type={% if i.destination_type == 'queue' %}q{% elif i.destination_type == 'exchange' %}e{% endif %}&properties_key=
+                    <!--<a href="{% url 'mq:binding-delete' %}?cluster={{ cluster }}&vhost={{ i.vhost |url_encode }}&exchange={{ i.source }}&destination={{ i.destination }}&type=
+                            {% if i.destination_type == 'queue' %}q{% elif i.destination_type == 'exchange' %}
+                                e{% endif %}&properties_key=
                             {% if i.routing_key %}{{ i.routing_key }}{% else %}~{% endif %}"
-                       class="btn btn-xs btn-danger {% if not request.user.is_superuser %} disabled{% endif %}">删除</a>
+                       class="btn btn-xs btn-danger {% if not request.user.is_superuser %}
+                         disabled{% endif %}">删除</a>-->
+                    <a class="btn btn-xs btn-danger btn_binding_delete {% if not request.user.is_superuser %}disabled{% endif %}"
+                       data-cluster="{{ cluster }}"
+                       data-vhost="{{ i.vhost }}"
+                       data-exchange="{{ i.source }}"
+                       data-destination="{{ i.destination }}"
+                       data-destination_type="{% if i.destination_type == 'queue' %}q{% elif i.destination_type == 'exchange' %}e{% endif %}"
+                       data-properties_key="{% if i.routing_key %}{{ i.routing_key }}{% else %}~{% endif %}">
+                        删除
+                    </a>
                 </td>
             </tr>
         {% endfor %}
@@ -39,13 +51,16 @@
 
 {% block custom_foot_js %}
     <script>
-        $(document).ready().on('click', '.btn_permission_delete', function () {
+        $(document).ready().on('click', '.btn_binding_delete', function () {
             var $this = $(this);
             var cluster = $this.data('cluster');
             var vhost = $this.data('vhost');
-            var username = $this.data('username');
-            var url = '{% url 'mq:permission-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&username=username0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("username0000000000", username);
-            var content = cluster + '集群的用户' + username + '访问虚拟主机' + vhost + '的权限'
+            var exchange = $this.data('exchange');
+            var destination = $this.data('destination');
+            var type = $this.data('destination_type');
+            var properties_key = $this.data('properties_key');
+            var url = '{% url 'mq:binding-delete'%}?cluster=cluster0000000000&vhost=vhost0000000000&exchange=exchange0000000000&destination=destination0000000000&type=destination_type0000000000&properties_key=properties_key0000000000'.replace("cluster0000000000", cluster).replace("vhost0000000000", vhost).replace("exchange0000000000", exchange).replace("destination0000000000", destination).replace("destination_type0000000000", type).replace("properties_key0000000000", properties_key);
+            var content = cluster + '集群的虚拟主机' + vhost + '中的交换机' + exchange + '绑定的队列' + destination + '属性键为' + properties_key
             objectDeleteGet($this, url, content);
         });
     </script>
@@ -60,11 +75,11 @@
                 bStateSave: true,
                 buttons: [
                     {% if request.user.is_superuser %}
-                    {
-                        text: '添加绑定', action: function (e, dt, button, config) {
-                            window.location = '{% url 'mq:binding-add' %}?cluster={{ res.cluster|url_encode }}&vhost={{ res.vhost|url_encode }}&exchange={{ res.exchange|url_encode }}';
-                        }
-                    },
+                        {
+                            text: '添加绑定', action: function (e, dt, button, config) {
+                                window.location = '{% url 'mq:binding-add' %}?cluster={{ res.cluster|url_encode }}&vhost={{ res.vhost|url_encode }}&exchange={{ res.exchange|url_encode }}';
+                            }
+                        },
                     {% endif %}
                     {extend: 'copy', text: '复制到剪贴板'},
                     {extend: 'csv', text: '导出CSV', title: '权限搜索结果'},
