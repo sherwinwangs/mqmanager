@@ -47,7 +47,7 @@
                                 <label for="mq_clusters" class="col-sm-2 control-label">选择MQ集群组<span
                                         class="red-fonts">*</span></label>
                                 <div class="col-sm-8">
-                                    <select name="cluster" class="form-control select2 select2-selection--multiple" multiple>
+                                    <select id="cluster_choice" name="cluster" class="form-control" multiple>
                                         {% for cluster,name in mq_clusters_list.items %}
                                             <option value="{{ cluster }}">{{ cluster }}({{ name }})</option>
                                         {% endfor %}
@@ -67,4 +67,10 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block custom_foot_js %}
+    <script>
+        $('#cluster_choice').select2();
+    </script>
 {% endblock %}

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block help_message %}
     <div class="alert alert-info help-message">
         <p>{{ action }}是 用来创建新的消息队列，在创建的同时可以填写【交换机绑定】中的信息完成交换机的绑定，在【 MQ集群组】中选择一个或多个MQ集群可以批量的在所选择的MQ集群上执行相关的操作。</p>
@@ -119,36 +120,13 @@
                                            class="form-control">
                                 </div>
                             </div>
-                            <!--
-                                <div class="form-group">
-                                    <label for="arguements"
-                                           class="col-sm-2 control-label">参数(Arguements)</label>
-                                    <div class="col-sm-2">
-                                        <input id="arguements-key" name="arguements-key" type="text"
-                                               class="form-control">
-                                    </div>
-                                    <div class="col-sm-1" style="width: 5px; margin: 5px">=</div>
-                                    <div class="col-sm-2">
-                                        <input id="arguements-value" name="arguements-value" type="text"
-                                               class="form-control">
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <select name="arguements-type" class="form-control">
-                                            <option value="String" selected>字符串</option>
-                                            <option value="Number">数字</option>
-                                            <option value="Boolean">布尔</option>
-                                            <option value="List">列表</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                -->
                             <div class="hr-line-dashed"></div>
                             <h3>交换机绑定</h3>
                             <div class="hr-line-dashed"></div>
                             <div class="form-group">
                                 <label for="exchange" class="col-sm-2 control-label">交换机(Exchange)</label>
                                 <div class="col-sm-8">
-                                    <select name="exchange" class="form-control">
+                                    <select id="exchange_choice" , name="exchange" class="form-control">
                                         <option value="" selected>请选择一个绑定的交换机</option>
                                         {% for exchange in exchange_distinct_list %}
                                             <option value="{{ exchange.name }}">
@@ -167,12 +145,13 @@
                                            class="form-control">
                                 </div>
                             </div>
+                            <div class="hr-line-dashed"></div>
                             <h3>MQ集群组</h3>
                             <div class="form-group">
                                 <label for="clusters" class="col-sm-2 control-label">选择MQ集群组<span
                                         class="red-fonts">*</span></label>
                                 <div class="col-sm-8">
-                                    <select name="cluster" class="form-control select2" multiple>
+                                    <select id="cluster_choice" name="cluster" class="form-control select2" multiple>
                                         {% for cluster,name in mq_clusters_list.items %}
                                             <option value="{{ cluster }}">{{ cluster }}({{ name }})</option>
                                         {% endfor %}
@@ -192,4 +171,12 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block custom_foot_js %}
+    <script>
+        $('#exchange_choice').select2();
+    </script>
+    <script>
+        $('#cluster_choice').select2();
+    </script>
 {% endblock %}
