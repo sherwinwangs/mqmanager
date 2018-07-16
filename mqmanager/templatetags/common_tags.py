@@ -29,6 +29,7 @@ def queue_consumers(cluster, vhost, queue):
         try:
             if len(json_str[cluster][vhost][queue]) != 0:
                 cluster = json_str[cluster][vhost][queue]
+                print(type(cluster),cluster)
             else:
                 cluster = ["没有集群"]
         except KeyError:

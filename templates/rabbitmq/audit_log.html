@@ -2,7 +2,7 @@
 {% load common_tags %}
 {% block help_message %}
     <div class="alert alert-info help-message">
-        <p>{{ action }}是 该管理平台所管理的所有MQ集群列表，如果要增加新的集群，请在项目目录中的settings文件中添加。</p>
+        <p>{{ action }}是 该管理平台中所管理的MQ集群的变更日志。</p>
     </div>
 {% endblock %}
 
@@ -13,7 +13,6 @@
     <td class="text-center">操作集群</td>
     <td class="text-center">数据</td>
     <td class="text-center">操作时间</td>
-    <td class="text-center">操作</td>
 {% endblock %}
 {% block table_body %}
     {% for log in log_list %}
@@ -24,11 +23,6 @@
             <td class="text-center">{{ log.cluster |env_name }}</td>
             <td class="text-center">{{ log.data }}</td>
             <td class="text-center">{{ log.logtime |date:"Y-m-d H:i:s"}}</td>
-            <td class="text-center">
-            <a class="btn btn-xs btn-info">
-                详情
-            </a>
-            </td>
         </tr>
     {% endfor %}
 
@@ -43,9 +37,9 @@
                 //dom: '<"html5buttons"B><"top"f>rt<"bottom"pli><"clear">',
                 dom: 'Blfrtip',
                 buttons: [
-                    {extend: 'copy', text: '复制到剪贴板', title: 'MQ集群列表'},
-                    {extend: 'csv', text: '导出CSV', title: 'MQ集群列表'},
-                    {extend: 'excel', text: '导出EXCEL', title: 'MQ集群列表'},
+                    {extend: 'copy', text: '复制到剪贴板', title: '操作日志'},
+                    {extend: 'csv', text: '导出CSV', title: '操作日志'},
+                    {extend: 'excel', text: '导出EXCEL', title: '操作日志'},
                 ], "oLanguage": { // 国际化配置
                     "sProcessing": "正在获取数据，请稍后...",
                     "sLengthMenu": "显示 _MENU_ 条",

@@ -128,22 +128,19 @@ rabbitmq_list = {
         "name": "聚合沙河-生产",
         "api_url": "http://192.168.2.11:15672",
         "username": "guest",
-        "password": "guest",
-        "node_list": ['192.168.2.11'],
+        "password": "guest"
     },
     "juhe-m7-pro": {
         "name": "聚合M7-生产",
         "api_url": "http://192.168.2.12:15672",
         "username": "guest",
-        "password": "guest",
-        "node_list": ['192.168.2.12'],
+        "password": "guest"
     },
 
     "juhe-pre": {
         "name": "聚合-线上预发布",
         "api_url": "http://shmq-pre.qianbao-inc.com:80",
         "username": "base_haodaibao",
-        "password": "5iBzA3CQYowr",
-        #"node_list": ['192.168.2.12'],
+        "password": "5iBzA3CQYowr"
     }
 }

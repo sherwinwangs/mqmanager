@@ -39,4 +39,7 @@ urlpatterns = [
 
     # audit log
     url(r'^audit$', audit_log, name='audit-log'),
+
+    # queue for cluster
+    url(r'^queue/cluster/sync', queue_cluster_sync, name='queue-cluster-sync'),
 ]

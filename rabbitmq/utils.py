@@ -97,7 +97,7 @@ class RabbitMQAPI(object):
     def detail_queue(self, vhost, queue):
         try:
             res = self.call_api(path='queues/%s/%s' % (urllib.quote_plus(vhost), urllib.quote_plus(queue)))
-        except Exception,e:
+        except Exception, e:
             print(e)
         return res
 
@@ -365,33 +365,11 @@ class batch_exec(RabbitMQAPI):
             json_obj = json.load(f)
             for ip in self.queue_consumers(vhost, queue):
                 try:
-                    cluster_list.append(json_obj[ip])
-                except Exception, e:
+                    cluster_list += json_obj[ip]
+                except:
                     cluster_list.append("CMDB:%s" % ip)
         return cluster_list
 
-
-def dump_queue_info():
-    cluster, vhost, queue, ip_list = "", "", "", []
-    data = {cluster: {vhost: {queue: [ip_list]}}}
-    for cluster in rabbitmq_list.keys():
-        vhost_list = [vhost['name'] for vhost in batch_exec(cluster).list_vhosts()[0][cluster]]
-        for vhost in vhost_list:
-            for queue in batch_exec(cluster).list_queues(vhost)[0][cluster]:
-                vhost = queue['vhost']
-                queue = queue['name']
-                app_list = batch_exec(cluster).queue_kylincluster(vhost, queue)
-                if not data.has_key(cluster):
-                    data[cluster]={}
-                if not data[cluster].has_key(vhost):
-                    data[cluster][vhost]={}
-                if not data[cluster][vhost].has_key(queue):
-                    data[cluster][vhost][queue]=app_list
-    with open(DATA_TMP_DIR + '/queue_detail.json', 'w') as f:
-        f.write(json.dumps(data))
-
-
-#dump_queue_info()
 
 '''
 http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/q1
@@ -406,7 +384,6 @@ delete binding
 http://192.168.2.12:15672/api/bindings/%2F/e/e1/q/qqq1/rtk11
 {"vhost":"/","source":"e1","destination":"qqq1","destination_type":"q","properties_key":"rtk11"}
 '''
-
 
 # a = RabbitMQAPI()
 

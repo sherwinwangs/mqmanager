@@ -75,6 +75,13 @@
                             }
                         },
                     {% endif %}
+                    {% for k,v in cluster_dic.items %}
+                    {
+                        text: '{{ v }}', action: function (e, dt, button, config) {
+                            window.location = '{% url 'mq:queue-list' %}?cluster={{ k }}';
+                        }
+                    },
+                    {% endfor %}
                     {extend: 'copy', text: '复制到剪贴板'},
                     {extend: 'csv', text: '导出CSV', title: '消息队列搜索结果'},
                     {extend: 'excel', text: '导出EXCEL', title: '消息队列搜索结果'},

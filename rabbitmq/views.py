@@ -35,7 +35,8 @@ def vhost_create(request):
     if request.method == 'POST':
         vhost = r_data.get('vhost', '').strip()
         messages = obj.create_vhost(vhost)
-        Auditlog.objects.create(user=request.user, type='创建', cluster=json.dumps(r_data.getlist('cluster', '')), target=app,
+        Auditlog.objects.create(user=request.user, type='创建', cluster=json.dumps(r_data.getlist('cluster', '')),
+                                target=app,
                                 url=request.get_full_path(),
                                 method=request.method, data=json.dumps({'vhost': vhost}))
     return render(request, 'rabbitmq/vhost_create.html', locals())
@@ -186,7 +187,12 @@ def exchange_delete(request):
 @require_role(role='user')
 def queue_list(request):
     app, action = "队列", "队列列表"
-    obj = batch_exec()
+    cluster_dic = {k: v['name'] for k, v in rabbitmq_list.items()}
+    cluster_dic['all'] = "全部集群"
+    cluster = request.GET.getlist('cluster', '')
+    if cluster == ['all']:
+        cluster = [k for k, v in rabbitmq_list.items()]
+    obj = batch_exec(cluster)
     queue_list = obj.list_queues()
     return render(request, 'rabbitmq/queue_list.html', locals())
 
@@ -255,7 +261,7 @@ def queue_detail(request):
         json_obj = json.load(f)
         for ip in consumer_ip_list:
             try:
-                consumer_cluster_list.append(json_obj[ip])
+                consumer_cluster_list += json_obj[ip]
             except Exception, e:
                 consumer_cluster_list.append('%s在KMS没找到' % ip)
     queue_info['consumer_ip_list'] = consumer_ip_list
@@ -284,13 +290,34 @@ def definitions_sync(request):
     return render(request, 'rabbitmq/definitions_sync.html', locals())
 
 
+@require_role(role='user')
 def audit_log(request):
+    app, action = "操作日志", "查看MQ操作日志"
     log_list = Auditlog.objects.all()
     return render(request, 'rabbitmq/audit_log.html', locals())
 
 
-@login_required
-def test_url(request, *args, **kwargs):
-    # obj = batch_exec()
-    # queue_list = obj.list_queues()
-    return render(request, 'rabbitmq/queue_detail.html', locals())
+@require_role(role='admin')
+def queue_cluster_sync(request):
+    cluster, vhost, queue, ip_list = "", "", "", []
+    data = {cluster: {vhost: {queue: [ip_list]}}}
+    for cluster in rabbitmq_list.keys():
+       vhost_list = [vhost['name'] for vhost in batch_exec(cluster).list_vhosts()[0][cluster]]
+       for vhost in vhost_list:
+           for queue in batch_exec(cluster).list_queues(vhost)[0][cluster]:
+               vhost = queue['vhost']
+               queue = queue['name']
+               app_list = batch_exec(cluster).queue_kylincluster(vhost, queue)
+               if not data.has_key(cluster):
+                   data[cluster] = {}
+               if not data[cluster].has_key(vhost):
+                   data[cluster][vhost] = {}
+               if not data[cluster][vhost].has_key(queue):
+                   data[cluster][vhost][queue] = app_list
+    with open(DATA_TMP_DIR + '/queue_detail.json', 'w') as f:
+       f.write(json.dumps(data))
+    Auditlog.objects.create(user=request.user, type='缓存', cluster='所有集群', target='队列消费集群',
+                            url=request.get_full_path(),
+                            method=request.method,
+                            data={})
+    return render(request, 'rabbitmq/queue_sync.html', locals())
