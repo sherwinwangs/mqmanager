@@ -6,14 +6,10 @@
 
 <!-- 用户管理 -->
 <li id="users">
-    <a href="#">
+    <a href="{% url 'users:user-list' %}">
         <i class="fa fa-group" style="font-size: 13px"></i> <span class="nav-label">用户管理</span><span
             class="fa arrow"></span>
     </a>
-    <ul class="nav nav-second-level active">
-        <li id="user"><a href="{% url 'users:user-list' %}">用户</a></li>
-        <li id="group"><a href="{% url 'users:user-list' %}">用户组</a></li>
-    </ul>
 </li>
 <!--应用1-->
 <li id="mq" class="active">
@@ -32,6 +28,6 @@
         <li><a href="{% url 'mq:queue-list' %}">消息队列管理</a></li>
     </ul>
     <ul class="nav nav-second-level">
-        <li><a href="{% url 'mq:queue-list' %}">应用操作日志</a></li>
+        <li><a href="{% url 'mq:audit-log' %}">应用操作日志</a></li>
     </ul>
 </li>

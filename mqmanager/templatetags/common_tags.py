@@ -15,7 +15,11 @@ def url_encode(value):
 
 @register.filter
 def env_name(value):
-    return rabbitmq_list[value]['name']
+    try:
+        env_name = rabbitmq_list[value]['name']
+    except:
+        env_name = value
+    return env_name
 
 
 @register.simple_tag
@@ -27,6 +31,6 @@ def queue_consumers(cluster, vhost, queue):
                 cluster = json_str[cluster][vhost][queue]
             else:
                 cluster = ["没有集群"]
-        except Exception, e:
+        except KeyError:
             cluster = ["没有缓存"]
     return cluster

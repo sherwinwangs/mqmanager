@@ -3,11 +3,13 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render, HttpResponse
-from mqmanager.settings import rabbitmq_list
-from .utils import *
-from django.http import HttpResponseRedirect
+from mqmanager.settings import rabbitmq_list, DATA_TMP_DIR
+from .utils import batch_exec
 from django.contrib.auth.decorators import login_required
 from mqmanager.common import require_role
+from models import Auditlog
+import json
+
 
 @require_role(role='user')
 def cluster_list(request):
@@ -30,17 +32,24 @@ def vhost_create(request):
     r_data = request.POST
     mq_clusters_list = {k: v['name'] for k, v in rabbitmq_list.items()}
     obj = batch_exec(r_data.getlist('cluster', ''))
-    vhost=r_data.get('vhost', '').strip()
-    messages = obj.create_vhost(vhost)
+    if request.method == 'POST':
+        vhost = r_data.get('vhost', '').strip()
+        messages = obj.create_vhost(vhost)
+        Auditlog.objects.create(user=request.user, type='创建', cluster=json.dumps(r_data.getlist('cluster', '')), target=app,
+                                url=request.get_full_path(),
+                                method=request.method, data=json.dumps({'vhost': vhost}))
     return render(request, 'rabbitmq/vhost_create.html', locals())
 
 
 @require_role(role='admin')
 def vhost_delete(request):
+    app, action = "虚拟主机", "删除虚拟主机"
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
     obj.delete_vhost(r_data['vhost'])
-    # return HttpResponseRedirect('/vhost/list')
+    Auditlog.objects.create(user=request.user, type='删除', cluster=r_data['cluster'], target=app,
+                            url=request.get_full_path(),
+                            method=request.method, data={'vhost': r_data['vhost']})
     return HttpResponse(200)
 
 
@@ -55,25 +64,31 @@ def permission_list(request):
 
 @require_role(role='admin')
 def permission_create(request):
-    app, action = "虚拟主机", "虚拟主机权限添加"
+    app, action = "虚拟主机权限", "创建虚拟主机权限"
     f_data = request.GET
-    obj = batch_exec(request.GET['cluster'])
+    obj = batch_exec(f_data['cluster'])
     user_list = obj.list_users()
     if request.method == 'POST':
         r_data = request.POST
         data = {"vhost": r_data['vhost'], "username": r_data['user'], "configure": r_data['configure'],
                 "write": r_data['write'], "read": r_data['read']}
         messages = obj.create_permission(vhost=r_data['vhost'], user=r_data['user'], data=data)
+        Auditlog.objects.create(user=request.user, type='创建', cluster=f_data['cluster'], target=app,
+                                url=request.get_full_path(),
+                                method=request.method, data=data)
     return render(request, 'rabbitmq/permission_create.html', locals())
 
 
 @require_role(role='admin')
 def permission_delete(request):
+    app, action = "虚拟主机权限", "删除虚拟主机权限"
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
     data = {"username": r_data['username'], "vhost": r_data['vhost']}
     obj.delete_permission(r_data['vhost'], username=r_data['username'], data=data)
-    # return HttpResponseRedirect('/permission/list?cluster=%s&vhost=%s' % (r_data['cluster'], r_data['vhost']))
+    Auditlog.objects.create(user=request.user, type='删除', cluster=r_data['cluster'], target=app,
+                            url=request.get_full_path(),
+                            method=request.method, data=data)
     return HttpResponse(200)
 
 
@@ -102,16 +117,20 @@ def exchange_create(request):
         f_data = request.POST
         arguments_list_str = ["alternate-exchange"]
         arguments_dic_str = {k: str(v) for k, v in f_data.items() if k in arguments_list_str and v}
-        data = {"vhost": f_data['vhost'], "name": f_data['name'].strip(), "type": f_data['type'], "durable": f_data['durable'],
+        data = {"vhost": f_data['vhost'], "name": f_data['name'].strip(), "type": f_data['type'],
+                "durable": f_data['durable'],
                 "auto_delete": f_data['auto_delete'], "internal": f_data['internal'], "arguments": arguments_dic_str}
         obj = batch_exec(mq_clusters_selectd)
         messages = obj.create_exchange(vhost=data['vhost'], exchange=data['name'].strip(), data=data)
+        Auditlog.objects.create(user=request.user, type='创建', cluster=mq_clusters_selectd, target=app,
+                                url=request.get_full_path(),
+                                method=request.method, data=data)
     return render(request, 'rabbitmq/exchange_create.html', locals())
 
 
 @require_role(role='user')
 def binding_list(request):
-    app, action = "交换机", "交换机绑定"
+    app, action = "交换机绑定", "查看交换机绑定"
     res = request.GET
     obj = batch_exec(res['cluster'])
     binding_list = obj.list_bindings(res['vhost'], res['exchange'])
@@ -120,38 +139,47 @@ def binding_list(request):
 
 @require_role(role='admin')
 def binding_create(request):
-    app, action = "交换机", "添加绑定"
+    app, action = "交换机绑定", "添加交换机绑定"
     f_data = request.GET
     obj = batch_exec(f_data['cluster'])
     queue_list = obj.list_queues(vhost=f_data['vhost'])[0][f_data['cluster']]
     if request.method == 'POST':
-        print(request.POST)
         p_data = request.POST
         data = {"vhost": p_data['vhost'], "source": p_data['exchange'], "destination_type": p_data['type'],
                 "destination": p_data['destination'], "routing_key": p_data['routing_key'],
                 "arguments": {}}
         messages = obj.create_binding(vhost=p_data['vhost'], exchange=p_data['exchange'], type=p_data['type'],
                                       destination=p_data['destination'], data=data)
+        Auditlog.objects.create(user=request.user, type='创建', cluster=f_data['cluster'], target=app,
+                                url=request.get_full_path(),
+                                method=request.method, data=data)
     return render(request, 'rabbitmq/binding_create.html', locals())
 
 
 @require_role(role='admin')
 def binding_delete(request):
+    app, action = "交换机绑定", "删除交换机绑定"
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
     data = {"vhost": r_data['vhost'], "source": r_data['exchange'], "destination": r_data['destination'],
             "destination_type": r_data['type'], "properties_key": r_data['properties_key']}
     obj.delete_binding(r_data['vhost'], r_data['exchange'], r_data['type'], r_data['destination'],
                        r_data['properties_key'], data=data)
+    Auditlog.objects.create(user=request.user, type='删除', cluster=r_data['cluster'], target=app,
+                            url=request.get_full_path(),
+                            method=request.method, data=data)
     return HttpResponse(200)
 
 
 @require_role(role='admin')
 def exchange_delete(request):
+    app, action = "交换机", "删除交换机"
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
     obj.delete_exchange(r_data['vhost'], r_data['exchange'])
-    # return HttpResponseRedirect('/exchange/list')
+    Auditlog.objects.create(user=request.user, type='删除', cluster=r_data['cluster'], target=app,
+                            url=request.get_full_path(),
+                            method=request.method, data={'vhost': r_data['vhost'], 'exchange': r_data['exchange']})
     return HttpResponse(200)
 
 
@@ -191,16 +219,27 @@ def queue_create(request):
                                                          destination=f_data['name'].strip(),
                                                          data=binding_data)
             messages = create_queue_messages + create_binding_messages
+            Auditlog.objects.create(user=request.user, type='创建', cluster=f_data.getlist('cluster', ''), target='交换机绑定',
+                                    url=request.get_full_path(),
+                                    method=request.method, data=binding_data)
         else:
             messages = create_queue_messages
+            Auditlog.objects.create(user=request.user, type='创建', cluster=f_data.getlist('cluster', ''), target=app,
+                                    url=request.get_full_path(),
+                                    method=request.method, data=data)
+
     return render(request, 'rabbitmq/queue_create.html', locals())
 
 
 @require_role(role='admin')
 def queue_delete(request):
+    app, action = "消息队列", "删除消息队列"
     r_data = request.GET
     obj = batch_exec(r_data['cluster'])
     obj.delete_queue(r_data['vhost'], r_data['queue'])
+    Auditlog.objects.create(user=request.user, type='删除', cluster=r_data['cluster'], target=app,
+                            url=request.get_full_path(),
+                            method=request.method, data={'vhost': r_data['vhost'], 'queue': r_data['queue']})
     return HttpResponse(200)
 
 
@@ -238,7 +277,16 @@ def definitions_sync(request):
         message = import_config.definitions_import(data=source_configuration)
         message['detail'] += '[%s --->  %s]' % (p_data['source'], p_data['destination'])
         messages.append(message)
+        Auditlog.objects.create(user=request.user, type='同步', cluster=p_data['destination'], target=app,
+                                url=request.get_full_path(),
+                                method=request.method,
+                                data={'source': p_data['source'], 'destination': p_data['destination']})
     return render(request, 'rabbitmq/definitions_sync.html', locals())
+
+
+def audit_log(request):
+    log_list = Auditlog.objects.all()
+    return render(request, 'rabbitmq/audit_log.html', locals())
 
 
 @login_required
