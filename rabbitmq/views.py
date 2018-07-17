@@ -6,7 +6,7 @@ from django.shortcuts import render, HttpResponse
 from mqmanager.settings import rabbitmq_list, DATA_TMP_DIR
 from .utils import batch_exec
 from django.contrib.auth.decorators import login_required
-from mqmanager.common import require_role
+from mqmanager.common import require_role, ServerError
 from models import Auditlog
 import json
 
@@ -31,14 +31,22 @@ def vhost_create(request):
     app, action = "虚拟主机", "创建虚拟主机"
     r_data = request.POST
     mq_clusters_list = {k: v['name'] for k, v in rabbitmq_list.items()}
-    obj = batch_exec(r_data.getlist('cluster', ''))
     if request.method == 'POST':
         vhost = r_data.get('vhost', '').strip()
-        messages = obj.create_vhost(vhost)
-        Auditlog.objects.create(user=request.user, type='创建', cluster=json.dumps(r_data.getlist('cluster', '')),
-                                target=app,
-                                url=request.get_full_path(),
-                                method=request.method, data=json.dumps({'vhost': vhost}))
+        cluster = r_data.getlist('cluster', '')
+        try:
+            if '' in [vhost, cluster]:
+                error = '带*内容不能为空'
+                raise ServerError(error)
+        except:
+            pass
+        else:
+            obj = batch_exec(cluster)
+            messages = obj.create_vhost(vhost)
+            Auditlog.objects.create(user=request.user, type='创建', cluster=json.dumps(r_data.getlist('cluster', '')),
+                                    target=app,
+                                    url=request.get_full_path(),
+                                    method=request.method, data=json.dumps({'vhost': vhost}))
     return render(request, 'rabbitmq/vhost_create.html', locals())
 
 
@@ -116,16 +124,24 @@ def exchange_create(request):
     if request.method == 'POST':
         mq_clusters_selectd = request.POST.getlist('cluster', '')
         f_data = request.POST
-        arguments_list_str = ["alternate-exchange"]
-        arguments_dic_str = {k: str(v) for k, v in f_data.items() if k in arguments_list_str and v}
-        data = {"vhost": f_data['vhost'], "name": f_data['name'].strip(), "type": f_data['type'],
-                "durable": f_data['durable'],
-                "auto_delete": f_data['auto_delete'], "internal": f_data['internal'], "arguments": arguments_dic_str}
-        obj = batch_exec(mq_clusters_selectd)
-        messages = obj.create_exchange(vhost=data['vhost'], exchange=data['name'].strip(), data=data)
-        Auditlog.objects.create(user=request.user, type='创建', cluster=mq_clusters_selectd, target=app,
-                                url=request.get_full_path(),
-                                method=request.method, data=data)
+        try:
+            if '' in [mq_clusters_selectd, f_data['name']]:
+                error = '带*内容不能为空'
+                raise ServerError(error)
+        except:
+            pass
+        else:
+            arguments_list_str = ["alternate-exchange"]
+            arguments_dic_str = {k: str(v) for k, v in f_data.items() if k in arguments_list_str and v}
+            data = {"vhost": f_data['vhost'], "name": f_data['name'].strip(), "type": f_data['type'],
+                    "durable": f_data['durable'],
+                    "auto_delete": f_data['auto_delete'], "internal": f_data['internal'],
+                    "arguments": arguments_dic_str}
+            obj = batch_exec(mq_clusters_selectd)
+            messages = obj.create_exchange(vhost=data['vhost'], exchange=data['name'].strip(), data=data)
+            Auditlog.objects.create(user=request.user, type='创建', cluster=mq_clusters_selectd, target=app,
+                                    url=request.get_full_path(),
+                                    method=request.method, data=data)
     return render(request, 'rabbitmq/exchange_create.html', locals())
 
 
@@ -146,14 +162,21 @@ def binding_create(request):
     queue_list = obj.list_queues(vhost=f_data['vhost'])[0][f_data['cluster']]
     if request.method == 'POST':
         p_data = request.POST
-        data = {"vhost": p_data['vhost'], "source": p_data['exchange'], "destination_type": p_data['type'],
-                "destination": p_data['destination'], "routing_key": p_data['routing_key'],
-                "arguments": {}}
-        messages = obj.create_binding(vhost=p_data['vhost'], exchange=p_data['exchange'], type=p_data['type'],
-                                      destination=p_data['destination'], data=data)
-        Auditlog.objects.create(user=request.user, type='创建', cluster=f_data['cluster'], target=app,
-                                url=request.get_full_path(),
-                                method=request.method, data=data)
+        try:
+            if '' in [p_data['destination'], p_data['routing_key']]:
+                error = '带*内容不能为空'
+                raise ServerError(error)
+        except:
+            pass
+        else:
+            data = {"vhost": p_data['vhost'], "source": p_data['exchange'], "destination_type": p_data['type'],
+                    "destination": p_data['destination'], "routing_key": p_data['routing_key'].strip(),
+                    "arguments": {}}
+            messages = obj.create_binding(vhost=p_data['vhost'], exchange=p_data['exchange'], type=p_data['type'],
+                                          destination=p_data['destination'], data=data)
+            Auditlog.objects.create(user=request.user, type='创建', cluster=f_data['cluster'], target=app,
+                                    url=request.get_full_path(),
+                                    method=request.method, data=data)
     return render(request, 'rabbitmq/binding_create.html', locals())
 
 
@@ -213,26 +236,36 @@ def queue_create(request):
         arguments_dic_int = {k: int(v) for k, v in f_data.items() if k in arguments_list_int and v}
         arguments_dic_str = {k: str(v) for k, v in f_data.items() if k in arguments_list_str and v}
         arguments_dic = dict(arguments_dic_int, **arguments_dic_str)
-        data = {"vhost": f_data['vhost'], "name": f_data['name'].strip(), "durable": f_data['durable'],
-                "auto_delete": f_data['auto_delete'], "arguments": arguments_dic}
-        obj = batch_exec(f_data.getlist('cluster', ''))
-        create_queue_messages = obj.create_queue(vhost=data['vhost'], queue=data['name'].strip(), data=data)
-        if f_data['exchange'] and f_data['routing_key']:
-            binding_data = {"vhost": f_data['vhost'], "source": f_data['exchange'], "destination_type": "q",
-                            "destination": f_data['name'], "routing_key": f_data['routing_key'].strip(),
-                            "arguments": {}}
-            create_binding_messages = obj.create_binding(vhost=f_data['vhost'], exchange=f_data['exchange'], type="q",
-                                                         destination=f_data['name'].strip(),
-                                                         data=binding_data)
-            messages = create_queue_messages + create_binding_messages
-            Auditlog.objects.create(user=request.user, type='创建', cluster=f_data.getlist('cluster', ''), target='交换机绑定',
-                                    url=request.get_full_path(),
-                                    method=request.method, data=binding_data)
+        cluster = f_data.getlist('cluster', '')
+        try:
+            if '' in [f_data['name'], cluster]:
+                error = '带*内容不能为空'
+                raise ServerError(error)
+        except:
+            pass
         else:
-            messages = create_queue_messages
-            Auditlog.objects.create(user=request.user, type='创建', cluster=f_data.getlist('cluster', ''), target=app,
-                                    url=request.get_full_path(),
-                                    method=request.method, data=data)
+            data = {"vhost": f_data['vhost'], "name": f_data['name'].strip(), "durable": f_data['durable'],
+                    "auto_delete": f_data['auto_delete'], "arguments": arguments_dic}
+            obj = batch_exec(cluster)
+            create_queue_messages = obj.create_queue(vhost=data['vhost'], queue=data['name'].strip(), data=data)
+            if f_data['exchange'] and f_data['routing_key']:
+                binding_data = {"vhost": f_data['vhost'], "source": f_data['exchange'], "destination_type": "q",
+                                "destination": f_data['name'], "routing_key": f_data['routing_key'].strip(),
+                                "arguments": {}}
+                create_binding_messages = obj.create_binding(vhost=f_data['vhost'], exchange=f_data['exchange'],
+                                                             type="q",
+                                                             destination=f_data['name'].strip(),
+                                                             data=binding_data)
+                messages = create_queue_messages + create_binding_messages
+                Auditlog.objects.create(user=request.user, type='创建', cluster=f_data.getlist('cluster', ''),
+                                        target='交换机绑定',
+                                        url=request.get_full_path(),
+                                        method=request.method, data=binding_data)
+            else:
+                messages = create_queue_messages
+                Auditlog.objects.create(user=request.user, type='创建', cluster=f_data.getlist('cluster', ''), target=app,
+                                        url=request.get_full_path(),
+                                        method=request.method, data=data)
 
     return render(request, 'rabbitmq/queue_create.html', locals())
 
@@ -302,20 +335,20 @@ def queue_cluster_sync(request):
     cluster, vhost, queue, ip_list = "", "", "", []
     data = {cluster: {vhost: {queue: [ip_list]}}}
     for cluster in rabbitmq_list.keys():
-       vhost_list = [vhost['name'] for vhost in batch_exec(cluster).list_vhosts()[0][cluster]]
-       for vhost in vhost_list:
-           for queue in batch_exec(cluster).list_queues(vhost)[0][cluster]:
-               vhost = queue['vhost']
-               queue = queue['name']
-               app_list = batch_exec(cluster).queue_kylincluster(vhost, queue)
-               if not data.has_key(cluster):
-                   data[cluster] = {}
-               if not data[cluster].has_key(vhost):
-                   data[cluster][vhost] = {}
-               if not data[cluster][vhost].has_key(queue):
-                   data[cluster][vhost][queue] = app_list
+        vhost_list = [vhost['name'] for vhost in batch_exec(cluster).list_vhosts()[0][cluster]]
+        for vhost in vhost_list:
+            for queue in batch_exec(cluster).list_queues(vhost)[0][cluster]:
+                vhost = queue['vhost']
+                queue = queue['name']
+                app_list = batch_exec(cluster).queue_kylincluster(vhost, queue)
+                if not data.has_key(cluster):
+                    data[cluster] = {}
+                if not data[cluster].has_key(vhost):
+                    data[cluster][vhost] = {}
+                if not data[cluster][vhost].has_key(queue):
+                    data[cluster][vhost][queue] = app_list
     with open(DATA_TMP_DIR + '/queue_detail.json', 'w') as f:
-       f.write(json.dumps(data))
+        f.write(json.dumps(data))
     Auditlog.objects.create(user=request.user, type='缓存', cluster='所有集群', target='队列消费集群',
                             url=request.get_full_path(),
                             method=request.method,

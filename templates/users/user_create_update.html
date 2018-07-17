@@ -88,14 +88,18 @@
                             <div class="form-group"><label class="col-sm-2 control-label">其它</label>
                                 <div class="col-sm-2">
                                     <div class="checkbox i-checks">
-                                        <label><input type="checkbox" value="1" name="extra" checked>启用账号 </label>
+                                        <label><input name="is_active" type="hidden" value="False">
+                                            <input name="is_active" type="checkbox" value="True" id="is_active" checked="checked">
+                                                   启用账号 </label>
                                     </div>
                                 </div>
+                                <!--
                                 <div class="col-sm-2">
                                     <div class="checkbox i-checks">
                                         <label><input type="checkbox" value="0" name="extra">发送邮件 </label>
                                     </div>
                                 </div>
+                                -->
                             </div>
                             <div class="hr-line-dashed"></div>
                             <div class="form-group">

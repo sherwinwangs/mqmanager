@@ -3,69 +3,169 @@
 {% block content %}
     <!--页面顶部消息提醒-->
     <div class="wrapper wrapper-content">
-        {% if error %}
-            <div class="alert alert-warning text-center">{{ error }}</div>
-        {% endif %}
-        {% if msg %}
-            <div class="alert alert-success">{{ msg | safe }}</div>
-        {% endif %}
+    {% if error %}
+        <div class="alert alert-warning text-center">{{ error }}</div>
+    {% endif %}
+    {% if msg %}
+        <div class="alert alert-success">{{ msg | safe }}</div>
+    {% endif %}
 
-        <!--汇总统计-->
-        <div class="row">
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-success pull-right">Users</span>
-                        <h5>Users</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h1 class="no-margins"><a href="#">
-                            {% if users_count %}{{ users_count }}{% else %}2{% endif %}</a></h1>
-                        <small>All user</small>
-                    </div>
+    <!--汇总统计-->
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-success pull-right">管理员</span>
+                    <h5>Admin</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><a href="{% url 'users:user-list' %}">
+                        {{ admins_count }}</a></h1>
+                    <small>All admin</small>
                 </div>
             </div>
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-info pull-right">集群</span>
-                        <h5>Cluster</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h1 class="no-margins"><a href="#">{% if acl_count %}{{ acls_count }}{% else %}10{% endif %}</a>
-                        </h1>
-                        <small>All Cluster</small>
-                    </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-warning pull-right">用户</span>
+                    <h5>User</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><a href="{% url 'users:user-list' %}">
+                        {{ users_count }}</a></h1>
+                    <small>All user</small>
                 </div>
             </div>
+        </div>
 
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-primary pull-right">Vhost</span>
-                        <h5>Vhost</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h1 class="no-margins"><a href="#"> <span
-                                id="views"></span>{% if views_count %}{{ views_count }}{% else %}8{% endif %}</a></h1>
-                        <small>All Vhost</small>
-                    </div>
+
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-info pull-right">集群</span>
+                    <h5>Cluster</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><a href="{% url 'mq:cluster-list' %}">{{ cluster_count }}</a>
+                    </h1>
+                    <small>All Cluster</small>
                 </div>
             </div>
+        </div>
 
-            <div class="col-sm-3">
-                <div class="ibox float-e-margins">
-                    <div class="ibox-title">
-                        <span class="label label-danger pull-right">Queue</span>
-                        <h5>Queue</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <h1 class="no-margins"><a href="#"> <span
-                                id="online_hosts"></span>{% if views_count %}{{ domains_count }}{% else %}2{% endif %}
-                        </a></h1>
-                        <small>All Queue</small>
+        <div class="col-sm-3">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-primary pull-right">操作数</span>
+                    <h5>Operate</h5>
+                </div>
+                <div class="ibox-content">
+                    <h1 class="no-margins"><a href="{% url 'mq:audit-log' %}"> <span
+                            id="views"></span>{{ today_operate }}</a></h1>
+                    <small>All Operate</small>
+                </div>
+            </div>
+        </div>
+
+        <!--分析图表-->
+        <div class="row" style="padding-left:5px;padding-right:5px;">
+            <div class="ibox float-e-margins">
+                <!--图表头部开始-->
+                <div class="ibox-title">
+                    <h5>聚合-沙河-生产环境</h5>
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-xs btn-white">今天</button>
+                            <button type="button" class="btn btn-xs btn-white active">本周</button>
+                            <button type="button" class="btn btn-xs btn-white">本月</button>
+                        </div>
                     </div>
                 </div>
+                <!--图表头部结束-->
+            </div>
+        </div>
+        <div class="row" style="padding-left:5px;padding-right:5px;">
+            <div class="ibox float-e-margins">
+                <!--图表头部开始-->
+                <div class="ibox-title">
+                    <h5>聚合-M7-生产环境</h5>
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-xs btn-white">今天</button>
+                            <button type="button" class="btn btn-xs btn-white active">本周</button>
+                            <button type="button" class="btn btn-xs btn-white">本月</button>
+                        </div>
+                    </div>
+                </div>
+                <!--图表头部结束-->
+            </div>
+        </div>
+
+        <div class="row" style="padding-left:5px;padding-right:5px;">
+            <div class="ibox float-e-margins">
+                <!--图表头部开始-->
+                <div class="ibox-title">
+                    <h5>聚合-预发布环境</h5>
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-xs btn-white">今天</button>
+                            <button type="button" class="btn btn-xs btn-white active">本周</button>
+                            <button type="button" class="btn btn-xs btn-white">本月</button>
+                        </div>
+                    </div>
+                </div>
+                <!--图表头部结束-->
+            </div>
+        </div>
+        <!--分析图表-->
+        <div class="row" style="padding-left:5px;padding-right:5px;">
+            <div class="ibox float-e-margins">
+                <!--图表头部开始-->
+                <div class="ibox-title">
+                    <h5>百联-沙河-生产环境</h5>
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-xs btn-white">今天</button>
+                            <button type="button" class="btn btn-xs btn-white active">本周</button>
+                            <button type="button" class="btn btn-xs btn-white">本月</button>
+                        </div>
+                    </div>
+                </div>
+                <!--图表头部结束-->
+            </div>
+        </div>
+        <div class="row" style="padding-left:5px;padding-right:5px;">
+            <div class="ibox float-e-margins">
+                <!--图表头部开始-->
+                <div class="ibox-title">
+                    <h5>百联-M7-生产环境</h5>
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-xs btn-white">今天</button>
+                            <button type="button" class="btn btn-xs btn-white active">本周</button>
+                            <button type="button" class="btn btn-xs btn-white">本月</button>
+                        </div>
+                    </div>
+                </div>
+                <!--图表头部结束-->
+            </div>
+        </div>
+
+        <div class="row" style="padding-left:5px;padding-right:5px;">
+            <div class="ibox float-e-margins">
+                <!--图表头部开始-->
+                <div class="ibox-title">
+                    <h5>百联-预发布环境</h5>
+                    <div class="pull-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-xs btn-white">今天</button>
+                            <button type="button" class="btn btn-xs btn-white active">本周</button>
+                            <button type="button" class="btn btn-xs btn-white">本月</button>
+                        </div>
+                    </div>
+                </div>
+                <!--图表头部结束-->
             </div>
         </div>
         <!--分析图表-->
@@ -96,9 +196,10 @@
             </div>
         </div>
     </div>
+    </div>
 {% endblock %}
 {% block custom_foot_js %}
-        <script src="{% static "js/plugins/echarts/echarts.js" %}"></script>
+    <script src="{% static "js/plugins/echarts/echarts.js" %}"></script>
     <script src="{% static "js/plugins/codemirror/codemirror.js" %}"></script>
     <script>
         $(document).ready(function () {
@@ -181,7 +282,8 @@
                     }
                 })
             }
-        );        require(
+        );
+        require(
             [
                 'echarts',
                 'echarts/chart/line'
@@ -200,7 +302,7 @@
                     },
                     backgroundColor: '#fff',
                     legend: {
-                        data: ['Publish', 'Confirm','Redelivered','Get'],
+                        data: ['Publish', 'Confirm', 'Redelivered', 'Get'],
                         x: 'center',
                         y: 'bottom',
                         //orient: 'vertical',

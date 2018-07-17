@@ -31,7 +31,16 @@ def queue_consumers(cluster, vhost, queue):
                 cluster = json_str[cluster][vhost][queue]
                 print(type(cluster),cluster)
             else:
-                cluster = ["没有集群"]
+                cluster = ["no_cluster"]
         except KeyError:
-            cluster = ["没有缓存"]
+            cluster = ["no_cached"]
     return cluster
+
+@register.filter
+def msg_translate(value):
+    if value == 'no_cluster':
+        return "没有集群"
+    elif value == 'no_cached':
+        return "没有缓存"
+    else:
+        return value

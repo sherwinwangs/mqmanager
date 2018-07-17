@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, reverse, HttpResponseRedirect, render
@@ -17,11 +18,18 @@ def require_role(role='user'):
             if not request.user.is_authenticated():
                 return HttpResponseRedirect(reverse('users:user-login'))
             elif role == 'admin':
-                # if request.session.get('role_id', 0) < 2:
-                if request.user.is_superuser == False:
-                    return HttpResponseRedirect(reverse('dashboard'))
+                if not request.user.is_superuser:
+                    return render(request, '403.html', locals())
             return func(request, *args, **kwargs)
 
         return __deco
 
     return _deco
+
+
+class ServerError(Exception):
+    """
+    self define exception
+    自定义异常
+    """
+    pass

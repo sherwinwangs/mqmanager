@@ -11,6 +11,7 @@ urlpatterns = [
     # User
     url(r'^user$', user_list, name='user-list'),
     url(r'^user/create$', user_create, name='user-create'),
+    url(r'^user/delete', user_delete, name='user-delete'),
     #url(r'^user/delete$', user_logout, name='user-list'),
 
     # Profile

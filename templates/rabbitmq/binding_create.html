@@ -37,7 +37,8 @@
                                 <label for="cluster" class="col-sm-2 control-label">集群(cluster)<span
                                         class="red-fonts">*</span></label>
                                 <div class="col-sm-8">
-                                    <input id="cluster" name="cluster" value="{{ f_data.cluster }}" type="text" readonly="readonly"
+                                    <input id="cluster" name="cluster" value="{{ f_data.cluster }}" type="text"
+                                           readonly="readonly"
                                            class="form-control">
                                 </div>
                             </div>
@@ -45,7 +46,8 @@
                                 <label for="vhost" class="col-sm-2 control-label">虚拟主机<span
                                         class="red-fonts">*</span></label>
                                 <div class="col-sm-8">
-                                    <input id="vhost" name="vhost" value="{{ f_data.vhost }}" type="text" readonly="readonly"
+                                    <input id="vhost" name="vhost" value="{{ f_data.vhost }}" type="text"
+                                           readonly="readonly"
                                            class="form-control">
                                 </div>
                             </div>
@@ -53,8 +55,9 @@
                                 <label for="exchange" class="col-sm-2 control-label">交换机(exchange)<span
                                         class="red-fonts">*</span></label>
                                 <div class="col-sm-8">
-                                    <input id="exchange" name="exchange" value="{{ f_data.exchange }}" type="text" readonly="readonly"
-                                           class="form-control" >
+                                    <input id="exchange" name="exchange" value="{{ f_data.exchange }}" type="text"
+                                           readonly="readonly"
+                                           class="form-control">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -71,6 +74,7 @@
                                         class="red-fonts">*</span></label>
                                 <div class="col-sm-8">
                                     <select name="destination" class="form-control">
+                                        <option value="" selected>请选择一个要绑定的队列</option>
                                         {% for i in queue_list %}
                                             <option value="{{ i.name }}">{{ i.name }}</option>
                                         {% endfor %}
