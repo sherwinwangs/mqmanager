@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render, HttpResponse
+from django.http import StreamingHttpResponse
 from mqmanager.settings import rabbitmq_list, DATA_TMP_DIR
 from .utils import batch_exec
 from django.contrib.auth.decorators import login_required
@@ -321,6 +322,20 @@ def definitions_sync(request):
                                 method=request.method,
                                 data={'source': p_data['source'], 'destination': p_data['destination']})
     return render(request, 'rabbitmq/definitions_sync.html', locals())
+
+
+@require_role(role='admin')
+def definitions_export(request):
+    app, action = "MQ集群", "集群配置备份"
+    cluster = request.GET.get('cluster', '')
+    obj = batch_exec(cluster)
+    config_file = obj.definitions_export()
+    response = StreamingHttpResponse(json.dumps(config_file))
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="{0}"'.format('%s.json' % cluster)
+    Auditlog.objects.create(user=request.user, type='备份', cluster=cluster, target=app, url=request.get_full_path(),
+                            method=request.method, data={})
+    return response
 
 
 @require_role(role='user')

@@ -29,12 +29,13 @@ def queue_consumers(cluster, vhost, queue):
         try:
             if len(json_str[cluster][vhost][queue]) != 0:
                 cluster = json_str[cluster][vhost][queue]
-                print(type(cluster),cluster)
+                print(type(cluster), cluster)
             else:
                 cluster = ["no_cluster"]
         except KeyError:
             cluster = ["no_cached"]
     return cluster
+
 
 @register.filter
 def msg_translate(value):
@@ -44,3 +45,12 @@ def msg_translate(value):
         return "没有缓存"
     else:
         return value
+
+
+@register.filter
+def byte_to_mb(value):
+    return value/1024/1024
+
+@register.filter
+def byte_to_gb(value):
+    return value/1024/1024/1024

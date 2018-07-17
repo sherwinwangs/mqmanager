@@ -21,8 +21,8 @@
             <td class="text-center">{{ info.api_url }}</td>
             <td class="text-center">{{ info.username }}</td>
             <td class="text-center">
-                <a href="#" class="btn btn-xs btn-info">健康状态</a>
-
+                <a href="{% url 'mq:definitions-export' %}?cluster={{ mq }}"
+                   class="btn btn-xs btn-info {% if not request.user.is_superuser %}disabled{% endif %}">备份配置</a>
                 <a href="{% url 'mq:definitions-sync' %}?destination={{ mq }}"
                    class="btn btn-xs btn-danger {% if not request.user.is_superuser %}disabled{% endif %}">同步配置</a>
 

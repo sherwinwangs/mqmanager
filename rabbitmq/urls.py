@@ -35,7 +35,7 @@ urlpatterns = [
 
     # definitions
     url(r'^definitions/sync$', definitions_sync, name='definitions-sync'),
-    url(r'^definitions/export$', definitions_sync, name='definitions-sync'),
+    url(r'^definitions/export$', definitions_export, name='definitions-export'),
 
     # audit log
     url(r'^audit$', audit_log, name='audit-log'),

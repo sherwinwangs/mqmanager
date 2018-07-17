@@ -164,12 +164,16 @@ class RabbitMQAPI(object):
         return message
 
     def list_channels(self):
-        res = self.call_api(path='channels')
-        return res
+        return self.call_api(path='channels')
 
     def detail_channel(self, channel):
-        res = self.call_api(path='channels/%s' % urllib.quote_plus(channel))
-        return res
+        return self.call_api(path='channels/%s' % urllib.quote_plus(channel))
+
+    def overview(self):
+        return self.call_api(path='overview')
+
+    def nodes(self):
+        return self.call_api(path='nodes')
 
 
 # batch exec on selectd cluster
@@ -349,6 +353,22 @@ class batch_exec(RabbitMQAPI):
             queue_info = mq_obj.detail_queue(vhost, queue)
             queue_info['cluster'] = k
         return queue_info
+
+    def overview(self):
+        cluster_info = {}
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            cluster_info[k] = mq_obj.overview()
+        return cluster_info
+
+    def nodes(self):
+        node_info = {}
+        for k, v in self.cluster_connector_args.items():
+            mq_obj = RabbitMQAPI(protocol=v['protocol'], host_name=v['host_name'], port=v['port'],
+                                 user_name=v['user_name'], password=v['password'])
+            node_info[k] = mq_obj.nodes()
+        return node_info
 
     def queue_consumers(self, vhost, queue):
         for k, v in self.cluster_connector_args.items():

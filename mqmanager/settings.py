@@ -104,8 +104,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
-
+#TIME_ZONE = 'UTC'
+TIME_ZONE='Asia/Shanghai'
 USE_I18N = True
 
 USE_L10N = True
@@ -124,23 +124,16 @@ STATICFILES_DIRS = (
 LOGIN_URL = '/users/login'
 DATA_TMP_DIR = os.path.join(BASE_DIR, 'tmp')
 rabbitmq_list = {
-    "juhe-shahe-pro": {
-        "name": "聚合沙河-生产",
-        "api_url": "http://192.168.2.11:15672",
-        "username": "guest",
-        "password": "guest"
-    },
-    "juhe-m7-pro": {
-        "name": "聚合M7-生产",
-        "api_url": "http://192.168.2.12:15672",
-        "username": "guest",
-        "password": "guest"
-    },
-
     "juhe-pre": {
-        "name": "聚合-线上预发布",
+        "name": "聚合-预发布",
         "api_url": "http://shmq-pre.qianbao-inc.com:80",
         "username": "base_haodaibao",
+        "password": "5iBzA3CQYowr"
+    },
+    "bailian-pre": {
+        "name": "百联-预发布",
+        "api_url": "http://blmq-pre.qianbao-inc.com:80",
+        "username": "base_csdnpay",
         "password": "5iBzA3CQYowr"
     }
 }
