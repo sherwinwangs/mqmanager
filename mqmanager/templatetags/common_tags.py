@@ -39,18 +39,29 @@ def queue_consumers(cluster, vhost, queue):
 
 @register.filter
 def msg_translate(value):
-    if value == 'no_cluster':
-        return "没有集群"
-    elif value == 'no_cached':
-        return "没有缓存"
-    else:
+    data_dic = {
+        'no_cluster': '没有集群',
+        'no_cached': '没有缓存',
+        'channels': '通道',
+        'consumers': '消费者',
+        'queues': '消息队列',
+        'connections': '连接',
+        'vhost': '虚拟主机',
+        'exchanges': '交换机',
+        'messages': '消息总数',
+
+    }
+    try:
+        return data_dic[value]
+    except:
         return value
 
 
 @register.filter
 def byte_to_mb(value):
-    return value/1024/1024
+    return value / 1024 / 1024
+
 
 @register.filter
 def byte_to_gb(value):
-    return value/1024/1024/1024
+    return value / 1024 / 1024 / 1024

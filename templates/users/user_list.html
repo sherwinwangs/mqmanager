@@ -38,7 +38,7 @@
             </td>
             <td class="text-center">
                 <a href="{% url 'users:user-delete' %}?id={{ user.id }}"
-                   class="btn btn-xs btn-danger {% if not request.user.is_superuser %}disabled{% endif %}">删除</a></td>
+                   class="btn btn-xs btn-danger {% if request.user.role != 'Admin' %}disabled{% endif %}">删除</a></td>
         </tr>
     {% endfor %}
 
@@ -53,7 +53,7 @@
                 //dom: '<"html5buttons"B><"top"f>rt<"bottom"pli><"clear">',
                 dom: 'Blfrtip',
                 buttons: [
-                    {% if request.user.is_superuser %}
+                    {% if request.user.role == 'Admin' %}
                         {
                             text: '添加用户', action: function (e, dt, button, config) {
                                 window.location = '{% url 'users:user-create' %}';

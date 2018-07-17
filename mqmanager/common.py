@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.shortcuts import redirect, reverse, HttpResponseRedirect, render
+from django.shortcuts import reverse, HttpResponseRedirect, render
 from settings import LOGIN_URL
 
 

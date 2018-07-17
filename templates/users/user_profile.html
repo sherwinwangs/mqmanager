@@ -59,8 +59,10 @@
                                             </tr>
                                             <tr>
                                                 <td class="text-navy">角色</td>
-                                                {% if request.user.is_superuser %}
-                                                    <td>管理员</td>
+                                                {% if request.user.role == 'Admin' %}
+                                                    <td>系统管理员</td>
+                                                {% elif request.user.role == 'Operator' %}
+                                                    <td>队列管理员</td>
                                                 {% else %}
                                                     <td>普通用户</td>
                                                 {% endif %}

@@ -16,7 +16,7 @@
             <div class="col-sm-3">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <span class="label label-success pull-right">管理员</span>
+                        <span class="label label-danger pull-right">系统管理员</span>
                         <h5>Admin</h5>
                     </div>
                     <div class="ibox-content">
@@ -44,7 +44,7 @@
             <div class="col-sm-3">
                 <div class="ibox float-e-margins">
                     <div class="ibox-title">
-                        <span class="label label-info pull-right">集群</span>
+                        <span class="label label-info pull-right">MQ集群</span>
                         <h5>Cluster</h5>
                     </div>
                     <div class="ibox-content">
@@ -86,12 +86,12 @@
                                         <tbody>
                                         {% for m,n in v.object_totals.items %}
                                             <tr>
-                                                <td class="text-navy">{{ m }}</td>
+                                                <td class="text-navy">{{ m|msg_translate }}</td>
                                                 <td>{{ n }}</td>
                                             </tr>
                                         {% endfor %}
                                         <tr>
-                                            <td class="text-navy">messages</td>
+                                            <td class="text-navy">消息总量</td>
                                             <td>{{ v.queue_totals.messages }}</td>
                                         </tr>
                                         </tbody>

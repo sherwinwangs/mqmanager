@@ -1,6 +1,5 @@
 # -*- coding:utf8 -*-
 from __future__ import unicode_literals
-import logging
 import urllib
 import urllib2
 import json
