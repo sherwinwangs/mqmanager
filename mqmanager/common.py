@@ -18,9 +18,15 @@ def require_role(role='user'):
             if not request.user.is_authenticated():
                 return HttpResponseRedirect(reverse('users:user-login'))
             elif role == 'admin':
-                if not request.user.is_superuser:
-                    return render(request, '403.html', locals())
-            return func(request, *args, **kwargs)
+                if request.user.role in ['Admin']:
+                    return func(request, *args, **kwargs)
+            elif role == 'operator':
+                if request.user.role in ['Operator', 'Admin']:
+                    return func(request, *args, **kwargs)
+            elif role == 'user':
+                if request.user.role in ['Operator', 'Admin', 'User']:
+                    return func(request, *args, **kwargs)
+            return render(request, '403.html')
 
         return __deco
 

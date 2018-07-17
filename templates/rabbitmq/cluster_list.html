@@ -22,9 +22,9 @@
             <td class="text-center">{{ info.username }}</td>
             <td class="text-center">
                 <a href="{% url 'mq:definitions-export' %}?cluster={{ mq }}"
-                   class="btn btn-xs btn-info {% if not request.user.is_superuser %}disabled{% endif %}">备份配置</a>
+                   class="btn btn-xs btn-info {% if request.user.role != 'Admin' %}disabled{% endif %}">备份配置</a>
                 <a href="{% url 'mq:definitions-sync' %}?destination={{ mq }}"
-                   class="btn btn-xs btn-danger {% if not request.user.is_superuser %}disabled{% endif %}">同步配置</a>
+                   class="btn btn-xs btn-danger {% if request.user.role != 'Admin' %}disabled{% endif %}">同步配置</a>
 
             </td>
         </tr>

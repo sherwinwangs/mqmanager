@@ -31,7 +31,7 @@
                 <a href="{% url 'mq:permission-list' %}?cluster={{ k }}&vhost={{ j.name }}"
                    class="btn btn-xs btn-info">查看权限</a>
 
-                <a class="btn btn-xs btn-danger btn_vhost_delete {% if not request.user.is_superuser %} disabled{% endif %}"
+                <a class="btn btn-xs btn-danger btn_vhost_delete {% if request.user.role != 'Admin' %} disabled{% endif %}"
                    data-cluster="{{ k }}" data-vhost="{{ j.name | url_encode }}">删除</a>
             </td>
             </tr>
@@ -61,7 +61,7 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
-                    {% if request.user.is_superuser %}
+                    {% if request.user.role == 'Admin' %}
                     {
                         text: '创建虚拟主机', action: function (e, dt, button, config) {
                             window.location = '{% url 'mq:vhost-add' %}';

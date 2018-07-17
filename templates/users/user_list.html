@@ -21,10 +21,12 @@
             <td class="text-center">{{ user.name }}</td>
             <td class="text-center">{{ user.email }}</td>
             <td class="text-center">
-                {% if user.is_superuser %}
-                    <a class="btn btn-xs btn-success">管理员</a>
+                {% if user.role == 'Admin' %}
+                    <a class="btn btn-xs btn-danger">系统管理员</a>
+                {% elif user.role == 'Operator' %}
+                    <a class="btn btn-xs btn-warning">队列管理员</a>
                 {% else %}
-                    <a class="btn btn-xs btn-primary">普通用户</a>
+                    <a class="btn btn-xs btn-info">普通用户</a>
                 {% endif %}
             </td>
             <td class="text-center">
@@ -35,7 +37,8 @@
                 {% endif %}
             </td>
             <td class="text-center">
-                <a href="{% url 'users:user-delete' %}?id={{ user.id }}" class="btn btn-xs btn-danger {% if not request.user.is_superuser %}disabled{% endif %}">删除</a></td>
+                <a href="{% url 'users:user-delete' %}?id={{ user.id }}"
+                   class="btn btn-xs btn-danger {% if not request.user.is_superuser %}disabled{% endif %}">删除</a></td>
         </tr>
     {% endfor %}
 
@@ -51,11 +54,11 @@
                 dom: 'Blfrtip',
                 buttons: [
                     {% if request.user.is_superuser %}
-                    {
-                        text: '添加用户', action: function (e, dt, button, config) {
-                            window.location = '{% url 'users:user-create' %}';
-                        }
-                    },
+                        {
+                            text: '添加用户', action: function (e, dt, button, config) {
+                                window.location = '{% url 'users:user-create' %}';
+                            }
+                        },
                     {% endif %}
                     {extend: 'copy', text: '复制到剪贴板', title: '用户列表'},
                     {extend: 'csv', text: '导出CSV', title: '用户列表'},

@@ -76,7 +76,7 @@ def user_create(request):
         username = request.POST.get('username', '')
         email = request.POST.get('email', '')
         name = request.POST.get('name', '')
-        is_superuser = request.POST.get('is_superuser', '')
+        role = request.POST.get('role', '')
         new_password = request.POST.get('new_password', '')
         verify_password = request.POST.get('verify_password', '')
         is_active = request.POST.get('is_active', '')
@@ -99,7 +99,7 @@ def user_create(request):
         except ServerError:
             pass
         else:
-            user = User.objects.create(username=username, email=email, name=name, is_superuser=int(is_superuser),
+            user = User.objects.create(username=username, email=email, name=name,role=role,
                                        is_active=is_active)
             user.set_password(verify_password)
             user.save()

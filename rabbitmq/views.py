@@ -155,7 +155,7 @@ def binding_list(request):
     return render(request, 'rabbitmq/binding_list.html', locals())
 
 
-@require_role(role='admin')
+@require_role(role='operator')
 def binding_create(request):
     app, action = "交换机绑定", "添加交换机绑定"
     f_data = request.GET
@@ -221,7 +221,7 @@ def queue_list(request):
     return render(request, 'rabbitmq/queue_list.html', locals())
 
 
-@require_role(role='admin')
+@require_role(role='operator')
 def queue_create(request):
     app, action = "消息队列", "创建消息队列"
     mq_clusters_list = {k: v['name'] for k, v in rabbitmq_list.items()}

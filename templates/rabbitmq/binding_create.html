@@ -73,7 +73,7 @@
                                 <label for="destination" class="col-sm-2 control-label">目标(destination)<span
                                         class="red-fonts">*</span></label>
                                 <div class="col-sm-8">
-                                    <select name="destination" class="form-control">
+                                    <select  id="queue_choice" name="destination" class="form-control">
                                         <option value="" selected>请选择一个要绑定的队列</option>
                                         {% for i in queue_list %}
                                             <option value="{{ i.name }}">{{ i.name }}</option>
@@ -103,4 +103,9 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block custom_foot_js %}
+    <script>
+        $('#queue_choice').select2();
+    </script>
 {% endblock %}

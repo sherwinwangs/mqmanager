@@ -12,7 +12,7 @@
             <li>
                 <span class="m-r-sm text-muted welcome-message">欢迎访问MQ管理平台</span>
             </li>
-            {% if request.user.is_superuser %}
+            {% if request.user.role == 'Admin' %}
             <li class="dropdown">
                 <a class="dropdown-toggle count-info" href="{% url 'mq:queue-cluster-sync' %}">
                     <span class="m-r-sm text-muted welcome-message">同步名称</span>

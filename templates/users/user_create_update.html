@@ -56,9 +56,10 @@
                             <div class="form-group">
                                 <label for="is_superuser" class="col-sm-2 control-label">角色</label>
                                 <div class="col-sm-8">
-                                    <select name="is_superuser" class="form-control">
-                                        <option value="0" selected>普通用户</option>
-                                        <option value="1">管理员</option>
+                                    <select name="role" class="form-control">
+                                        <option value="User" selected>普通用户</option>
+                                        <option value="Operator">队列管理员</option>
+                                        <option value="Admin">系统管理员</option>
                                     </select>
                                 </div>
                             </div>
@@ -89,8 +90,9 @@
                                 <div class="col-sm-2">
                                     <div class="checkbox i-checks">
                                         <label><input name="is_active" type="hidden" value="False">
-                                            <input name="is_active" type="checkbox" value="True" id="is_active" checked="checked">
-                                                   启用账号 </label>
+                                            <input name="is_active" type="checkbox" value="True" id="is_active"
+                                                   checked="checked">
+                                            启用账号 </label>
                                     </div>
                                 </div>
                                 <!--

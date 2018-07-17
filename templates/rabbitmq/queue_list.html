@@ -35,7 +35,7 @@
                     <td>
                         <a href="{% url 'mq:queue-detail' %}?cluster={{ k }}&vhost={{ j.vhost }}&queue={{ j.name }}"
                            class="btn btn-xs btn-info">详情</a>
-                        <a class="btn btn-xs btn-danger btn_queue_delete {% if not request.user.is_superuser %}disabled{% endif %}"
+                        <a class="btn btn-xs btn-danger btn_queue_delete {% if request.user.role != 'Admin' %}disabled{% endif %}"
                            data-cluster="{{ k }}" data-vhost="{{ j.vhost }}"
                            data-queue="{{ j.name |url_encode }}">删除</a>
 
@@ -68,7 +68,7 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
-                    {% if request.user.is_superuser %}
+                    {% if request.user.role == 'Admin' or  request.user.role == 'Operator' %}
                         {
                             text: '创建消息队列', action: function (e, dt, button, config) {
                                 window.location = '{% url 'mq:queue-add' %}';

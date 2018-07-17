@@ -14,8 +14,9 @@ import json
 def dashboard(request):
     app, action = "仪表盘", "仪表盘"
     # from database
-    users_count = User.objects.filter(is_superuser=False).count()
-    admins_count = User.objects.filter(is_superuser=True).count()
+    users_count = User.objects.filter(role='User').count()
+    operators_count = User.objects.filter(role='Operator').count()
+    admins_count = User.objects.filter(role='Admin').count()
     cluster_count = len([k for k,v in rabbitmq_list.items()])
     today_operate = Auditlog.objects.all().count()
 

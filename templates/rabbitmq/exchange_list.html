@@ -25,7 +25,7 @@
                     <td align="center">
                         <a href="{% url 'mq:binding-list' %}?cluster={{ k |url_encode }}&vhost={{ j.vhost | url_encode }}&exchange={% if not j.name %}~{% else %}{{ j.name }}{% endif %}"
                            class="btn btn-xs btn-info">查看绑定</a>
-                        <a class="btn btn-xs btn-danger btn_exchange_delete{% if not request.user.is_superuser %} disabled {% endif %}"
+                        <a class="btn btn-xs btn-danger btn_exchange_delete{% if request.user.role != 'Admin' %} disabled {% endif %}"
                            data-cluster="{{ k }}" data-vhost="{{ j.vhost }}"
                            data-exchange="{% if not j.name %}~{% else %}{{ j.name }}{% endif %}">删除</a>
                     </td>
@@ -57,7 +57,7 @@
                 dom: 'Blfrtip',
                 bStateSave: true,
                 buttons: [
-                    {% if request.user.is_superuser %}
+                    {% if request.user.role == 'Admin' %}
                         {
                             text: '创建交换机', action: function (e, dt, button, config) {
                                 window.location = '{% url 'mq:exchange-add' %}';
